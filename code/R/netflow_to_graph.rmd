@@ -1,0 +1,52 @@
+---
+title: "Convert CTU13 netflow to graph"
+output: html_notebook
+---
+
+```{r}
+library(dplyr)
+#netflow<-readr::read_csv("https://www.dropbox.com/s/np5ggx5ujwgll7k/ctu-13.labeled.cleaned?dl=1") 
+netflow<-readr::read_csv("TrafficLabelling /Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv")
+netflow %>% select(src,dst) %>% unique()
+netflow %>% select(src) %>% unique()
+netflow[which(netflow$dst %in% netflow$src),]$src
+intersect(netflow$dst,netflow$src)
+
+```
+```{r fig.height=12, fig.width=12}
+library(igraph)
+
+nodes <- c(netflow$`Source IP`,netflow$`Destination IP`) %>% unique()
+links <- netflow %>% select(`Source IP`,`Destination IP`) %>% unique()
+
+
+
+net <- graph_from_data_frame(d=links, vertices=nodes, directed = T) 
+
+plot(net, edge.arrow.size=.1,
+     vertex.label=NA,
+     vertex.size=1,
+     edge.curved=.1)
+write_graph(net,file="/tmp/Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv.dot",format="dot")
+
+
+V(net)
+```
+
+```{r}
+library(readr)
+library(dplyr)
+ctu_netflow<-read_csv("../../rawdata/ctu-13/capture20110810.binetflow.labels.gz")
+
+ctu_netflow_srcdst<-ctu_netflow %>% select(SrcAddr,DstAddr,SrcBytes,TotBytes) %>% tidyr::unite("src_dst",c("SrcAddr","DstAddr")) 
+ctu_netflow_dstsrc<-ctu_netflow %>% select(SrcAddr,DstAddr,SrcBytes,TotBytes) %>% tidyr::unite("dst_src",c("DstAddr","SrcAddr")) 
+
+
+
+
+ctu_netflow_src_dst_agg <- ctu_netflow_srcdst %>% group_by(src_dst) %>% summarise(srcBytes=sum(SrcBytes),ToBytes=sum(TotBytes))
+ctu_netflow_dst_src_agg <- ctu_netflow_srcdst %>% group_by(dst_src) %>% summarise(srcBytes=sum(SrcBytes),ToBytes=sum(ToBytes))
+
+ctu_netflow$TotBytes
+```
+
