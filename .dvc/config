@@ -1,0 +1,5 @@
+[core]
+    remote = data-storage
+    autostage = true
+['remote "data-storage"']
+    url = ssh://harpo@localhost/home/harpo/Dropbox/data-storage/
