@@ -2,4 +2,5 @@
     remote = data-storage
     autostage = true
 ['remote "data-storage"']
-    url = ssh://harpo@localhost/home/harpo/Dropbox/data-storage/
+    #url = ssh://harpo@localhost/home/harpo/Dropbox/data-storage/
+    url = ssh://harpo@catanuso.duckdns.org:2224/home/harpo/Dropbox/data-storage/
