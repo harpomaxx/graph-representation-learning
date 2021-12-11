@@ -20,7 +20,7 @@ right_join(ctu_netflow_src_dst_agg,ctu_netflow_dst_src_agg,by=c("src_dst"="dst_s
 ```
 
 ## Convert netflow to dot
-```{r}
+```{r message=FALSE, warning=FALSE}
 library(readr)
 library(dplyr)
 library(igraph)
@@ -32,12 +32,24 @@ ctu_netflow_src_dst_agg <- ctu_netflow_filtered %>% group_by(src_dst) %>% summar
 ctu_netflow_agg<-ctu_netflow_src_dst_agg %>% tidyr::separate(src_dst,c("src","dst"),sep="_")
 
 ## igraph
-nodes <- c(ctu_netflow_agg$src ,ctu_netflow_agg$dst) %>% unique()
+#nodes <- c(ctu_netflow_agg$src ,ctu_netflow_agg$dst) %>% unique()
 links <- ctu_netflow_agg %>% select(src,dst,TotPkts) %>% unique()
-net <- graph_from_data_frame(d=links, vertices=nodes, directed = T ) 
-V(net)
-write_graph(net,file="../../data/capture20110810.binetflow.labels.dot",format="dot")
+net <- graph_from_data_frame(d=links, directed = T ) 
+## Weights
+E(net)$weight <-links %>% select(TotPkts)  %>% unname() %>% unlist()
 ```
+
+# Calculate degree and weight degree
+```{r}
+graph_degree_in<-degree(net,V(net),mode = "in")
+graphs_trength_in<-strength(net,V(net),mode = "in")
+graphs_trength_out<-strength(net,V(net),mode = "out")
+graphs_trength_out %>% order() %>% head()
+```
+
+
+
+
 
 ## calculate BC
 ```{r}
