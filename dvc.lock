@@ -1,0 +1,17 @@
+schema: '2.0'
+stages:
+  convert:
+    cmd: Rscript code/R/convert_net2graph.R --input rawdata/ctu-13/capture20110810.binetflow.labels.gz
+      --output data/pajek/capture20110810.binetflow.pajek
+    deps:
+    - path: code/R/convert_net2graph.R
+      md5: ded29e3c95babf5e0e67b263f92ab8c1
+      size: 1877
+    - path: rawdata/ctu-13/capture20110810.binetflow.labels.gz
+      md5: 2596558e22ac484fc0f92b489cf4c434
+      size: 66410453
+    outs:
+    - path: data/pajek
+      md5: 0ade4408d6be8908d1331bea09bbce8a.dir
+      size: 10284700
+      nfiles: 1

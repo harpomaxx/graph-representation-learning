@@ -1,0 +1,10 @@
+stages:
+  convert:
+    cmd: Rscript code/R/convert_net2graph.R --input rawdata/ctu-13/capture20110810.binetflow.labels.gz
+      --output data/pajek/capture20110810.binetflow.pajek
+    deps:
+    - code/R/convert_net2graph.R
+    - rawdata/ctu-13/capture20110810.binetflow.labels.gz
+    outs:
+    - data/pajek:
+        persist: true
