@@ -20,8 +20,8 @@ Dir|     direction of the conection (<- or -> or <->)
 DstAddr| Destination IP address
 Dport| Destion Port
 State| State of the connection (see netflow argus reference)
-sTos|  type of service field for source IP address
-dTos|  type of service field for destionation IP address.
+sTos|  [type of service](https://en.wikipedia.org/wiki/Type_of_service) field for source IP address
+dTos|  [type of service](https://en.wikipedia.org/wiki/Type_of_service) field for destionation IP address.
 TotPkts| Total packets transfered of the connection
 TotBytes| Total bytes transfered in the connection
 SrcBytes| Bytes transmited by the source IP Address
