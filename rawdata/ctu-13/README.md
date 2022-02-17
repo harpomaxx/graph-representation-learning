@@ -1,3 +1,11 @@
+Remember that for actually downloading the ctu-13 capture you need to run 
+
+```
+cd graph-representation-learning
+graph-representation-learning$ dvc pull
+```
+
+
 Each capture of the CTU-13 was generated using [ARGUS](https://openargus.org/) tool
 
 
