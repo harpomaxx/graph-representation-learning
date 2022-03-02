@@ -12,3 +12,4 @@ done
 
 mv *.ncol ../ncolFiles/
 
+

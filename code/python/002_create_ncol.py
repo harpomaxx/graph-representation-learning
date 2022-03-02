@@ -29,3 +29,4 @@ finalDF = concatAll.groupby(['origin','destination'], as_index=False)['weight'].
 # create NCOL file to then generate the graph using igraph: g=Graph.Read_Ncol(ncolName, weights=True, directed=True)
 finalDF.to_csv(ncolName, sep=' ', header=None, index=None)
 
+
