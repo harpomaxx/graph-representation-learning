@@ -8,15 +8,60 @@ output: html_notebook
 ```{r}
 library(readr)
 library(dplyr)
-ctu_netflow<-read_csv("../../rawdata/ctu-13/capture20110810.binetflow.labels.gz")
+ctu_netflow<-
+  read_csv("../../rawdata/ctu-13/capture20110810.binetflow.labels.gz")
 
-ctu_netflow_srcdst<-ctu_netflow %>% select(SrcAddr,DstAddr,TotPkts) %>% tidyr::unite("src_dst",c("SrcAddr","DstAddr")) 
-ctu_netflow_dstsrc<-ctu_netflow %>% select(SrcAddr,DstAddr,TotPkts) %>% tidyr::unite("dst_src",c("DstAddr","SrcAddr")) 
+ctu_netflow <- 
+  ctu_netflow %>% 
+  filter(Proto %in% c("udp", "tcp")) %>% 
+  mutate(DstBytes = TotBytes-SrcBytes) %>%
+    select(SrcAddr, DstAddr, DstBytes, SrcBytes) 
 
-ctu_netflow_src_dst_agg <- ctu_netflow_srcdst %>% group_by(src_dst) %>% summarise(TotPkts=sum(TotPkts))
-ctu_netflow_dst_src_agg <- ctu_netflow_dstsrc %>% group_by(dst_src) %>% summarise(TotPkts=sum(TotPkts))
+# create src_dst and dst_src keys
+ctu_netflow_srcdst <- ctu_netflow %>% 
+  select(SrcAddr, DstAddr, SrcBytes, DstBytes) %>% 
+  tidyr::unite("src_dst", c("SrcAddr","DstAddr")) 
+ctu_netflow_dstsrc<-ctu_netflow %>% 
+  select(SrcAddr,DstAddr, SrcBytes, DstBytes) %>% 
+  tidyr::unite("dst_src", c("DstAddr","SrcAddr")) 
 
-right_join(ctu_netflow_src_dst_agg,ctu_netflow_dst_src_agg,by=c("src_dst"="dst_src"))
+# aggregate Bytes from src_dst and dst_src
+ctu_netflow_src_dst_agg <- ctu_netflow_srcdst %>% 
+  group_by(src_dst) %>% 
+  summarise(TotSrcBytes = sum(SrcBytes),
+            TotDstBytes = sum(DstBytes))
+ctu_netflow_dst_src_agg <- ctu_netflow_dstsrc %>% 
+  group_by(dst_src) %>% 
+  summarise(TotSrcBytes = sum(SrcBytes),
+            TotDstBytes = sum(DstBytes))
+
+ctu_netflow_4tuple<-left_join(ctu_netflow_src_dst_agg,
+                               ctu_netflow_dst_src_agg,
+                               by=c("src_dst"="dst_src")) %>%
+  mutate_all(~replace(., is.na(.), 0))
+
+ctu_netflow_4tuple <-
+  ctu_netflow_4tuple %>% mutate(TotSrcBytes = TotSrcBytes.x + TotDstBytes.y,
+                                TotDstBytes = TotDstBytes.x + TotSrcBytes.y) %>%
+  select(src_dst, TotSrcBytes, TotDstBytes) 
+
+unique_ctu_netflow_4tuple <- 
+  ctu_netflow_4tuple %>%  
+  tidyr::separate(src_dst, c("SrcAddr", "DstAddr"), sep = "_") %>% #select(SrcAddr, DstAddr) %>%
+  group_by(grp = paste(pmax(SrcAddr, DstAddr), pmin(SrcAddr, DstAddr), sep = "_")) %>%
+  slice(1) %>%
+  ungroup() %>%
+  select(-grp) %>% tidyr::unite("src_dst", c("SrcAddr", "DstAddr"))
+
+
+#unique_ctu_netflow_4tuple %>% filter(src_dst=="111.221.102.89_147.32.84.1")
+#ctu_netflow_4tuple %>% filter(src_dst=="111.221.102.89_147.32.84.1")
+#left_join(unique_ctu_netflow_4tuple,ctu_netflow_4tuple,by="src_dst")
+
+#ctu_netflow_4tuple %>% select(everything()) %>%  # replace to your needs
+#  summarise_all(funs(sum(is.na(.))))
+
+
 ```
 
 ## Convert netflow to dot
