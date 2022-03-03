@@ -1,6 +1,8 @@
 suppressPackageStartupMessages(library(readr))
 suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(tidyr))
+suppressPackageStartupMessages(library(igraph))
+
 
 
 #' Convert Netflow data file to pajek graph format
