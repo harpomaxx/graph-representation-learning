@@ -30,3 +30,4 @@ finalDF = concatAll.groupby(['origin','destination'], as_index=False)['weight'].
 finalDF.to_csv(ncolName, sep=' ', header=["origin","destination","weight"], index=None)
 
 
+
