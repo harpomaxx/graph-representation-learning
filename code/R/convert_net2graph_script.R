@@ -1,7 +1,6 @@
 #!/bin/Rscript
 #  Convert a netflow file to a CSV files with 4 tuples  
 
-
 suppressPackageStartupMessages(library(optparse))
 suppressPackageStartupMessages(library(igraph))
 
@@ -9,7 +8,7 @@ source("code/R/convert_net2graph.R")
 
 option_list <- list(
   make_option("--input", action="store", type="character", help = "Set the name of the input netflow file"),
-  make_option("--output", action="store", type="character", default="netflow-igraph.dot", help = "Set the name of the output  pajek file")
+  make_option("--output", action="store", type="character", default="netflow-igraph.ncol", help = "Set the name of the output  ncol file")
 )
 opt <- parse_args(OptionParser(option_list=option_list))
 

@@ -2,6 +2,12 @@
 title: "Convert netflow data to graph"
 output: html_notebook
 ---
+```{r}
+source("convert_net2graph.R")
+
+net_csv<-read_csv("../../test.csv")
+net_csv %>% filter(weights == 0)
+```
 
 
 # Checking bidireccionality on netflow file
@@ -54,6 +60,17 @@ unique_ctu_netflow_4tuple <-
   select(-grp) %>% tidyr::unite("src_dst", c("SrcAddr", "DstAddr"))
 
 
+ links <-
+    unique_ctu_netflow_4tuple %>%  
+    tidyr::separate(src_dst, c("SrcAddr", "DstAddr"), sep = "_") %>%
+    select(SrcAddr, DstAddr, TotSrcBytes, TotDstBytes) 
+  
+  net <-
+    graph_from_data_frame(d = links,directed = T)
+  E(net)$weight <-
+    links %>% select(TotPkts)  %>% unname() %>% unlist()
+  net
+
 #unique_ctu_netflow_4tuple %>% filter(src_dst=="111.221.102.89_147.32.84.1")
 #ctu_netflow_4tuple %>% filter(src_dst=="111.221.102.89_147.32.84.1")
 #left_join(unique_ctu_netflow_4tuple,ctu_netflow_4tuple,by="src_dst")
@@ -62,6 +79,40 @@ unique_ctu_netflow_4tuple <-
 #  summarise_all(funs(sum(is.na(.))))
 
 
+```
+## Tati's approach
+```{r}
+ctu_netflow<-
+  read_csv("../../rawdata/ctu-13/capture20110810.binetflow.labels.gz")
+
+ctu_netflow <- 
+  ctu_netflow %>% 
+  filter(Proto %in% c("udp", "tcp")) %>% 
+  mutate(DstBytes = TotBytes-SrcBytes) %>%
+    select(SrcAddr, DstAddr, DstBytes, SrcBytes) 
+
+ctu_netflow %>% filter(SrcBytes==0)
+# create src_dst and dst_src keys
+ctu_netflow_srcdst <- ctu_netflow %>% 
+  select(SrcAddr, DstAddr, SrcBytes) %>% rename(origin=SrcAddr,destination="DstAddr",weight="SrcBytes")
+ 
+ctu_netflow_dstsrc<-ctu_netflow %>% 
+  select(DstAddr, SrcAddr, DstBytes) %>% rename(origin=DstAddr,destination="SrcAddr",weight="DstBytes")
+  
+
+ctu_netflow_all<-rbind(ctu_netflow_dstsrc,ctu_netflow_srcdst) 
+ctu_netflow_all<- ctu_netflow_all %>% group_by(origin,destination) %>% summarise(weight=sum(weight)) %>% ungroup()
+
+links <- ctu_netflow_all %>% select(origin,destination,weight)
+net <- graph_from_data_frame(d=links, directed = T ) 
+## Weights
+E(net)$weight <-links %>% select(weight)  %>% unname() %>% unlist()
+
+#write_graph(net,file="/tmp/caca.ncol",format="ncol")
+#ctu_netflow_all %>% ungroup() %>% filter(origin=="147.32.84.10" & destination=="147.32.80.9")
+#read_graph()
+
+links %>% filter(weight == 0)
 ```
 
 ## Convert netflow to dot

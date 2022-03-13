@@ -1,0 +1,9 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+```{r}
+source(file="convert_net2graph.R")
+net_graph<-convert_net2graph("../../rawdata/ctu-13/capture20110810.binetflow.labels.gz")
+```
+
