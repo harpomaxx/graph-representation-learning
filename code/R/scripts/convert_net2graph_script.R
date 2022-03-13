@@ -4,7 +4,7 @@
 suppressPackageStartupMessages(library(optparse))
 suppressPackageStartupMessages(library(igraph))
 
-source("code/R/convert_net2graph.R")
+source("code/R/functions/convert_net2graph.R")
 
 option_list <- list(
   make_option("--input", action="store", type="character", help = "Set the name of the input netflow file"),

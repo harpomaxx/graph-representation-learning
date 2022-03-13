@@ -3,11 +3,11 @@
 
 
 suppressPackageStartupMessages(library(optparse))
-source("code/R/convert_net24tuples.R")
+source("code/R/functins/convert_net24tuples.R")
 
 option_list <- list(
   make_option("--input", action="store", type="character", help = "Set the name of the input netflow file"),
-  make_option("--output", action="store", type="character", default="netflow-igraph.dot", help = "Set the name of the output  pajek file")
+  make_option("--output", action="store", type="character", default="netflow-igraph.csv", help = "Set the name of the output  csv file")
 )
 opt <- parse_args(OptionParser(option_list=option_list))
 
