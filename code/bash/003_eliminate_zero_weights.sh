@@ -8,7 +8,7 @@ mkdir ../ncol_sIP-dIP-BnoZeros
 
 for filename in ./*.ncol; do 
     base=`basename ${filename} .ncol`
-    awk '{if ($3-ne0) print $1, $2, $3}' ${filename} | sed '1iorigin destination weight' > ${base}_noZeroB.ncol
+    awk '{if ($3-ne0) print $1, $2, $3}' ${filename} > ${base}_noZeroB.ncol
 done    
 
 mv *_noZeroB.ncol ../ncol_sIP-dIP-BnoZeros/
