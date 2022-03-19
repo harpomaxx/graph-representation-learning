@@ -17,7 +17,7 @@ if (opt$input %>% is.null() || opt$output %>% is.null()){
   quit()
 }else{
   net_graph <- convert_net2graph(input_file = opt$input)
-  ## Save 4 tuples files
+  ## Save graph 
   dir.create(dirname(opt$output), showWarnings = FALSE)
   write_graph(net_graph,file=opt$output,format="ncol")
 }

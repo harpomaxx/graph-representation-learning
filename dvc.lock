@@ -15,3 +15,65 @@ stages:
       md5: 0ade4408d6be8908d1331bea09bbce8a.dir
       size: 10284700
       nfiles: 1
+  generate_ncol:
+    cmd: bash code/bash/convert_net2graph_all.sh
+    deps:
+    - path: code/R/functions/convert_net2graph.R
+      md5: 9b27bc6626c45c420a9f8b8eb348d779
+      size: 1554
+    - path: code/R/scripts/convert_net2graph_cmd.R
+      md5: 621ea880cbb449796a1f8311bb8759ee
+      size: 897
+    - path: code/bash/convert_net2graph_all.sh
+      md5: 565ef5b66a07b059d04017eb227f8fa2
+      size: 1098
+    - path: rawdata/ctu-13/capture20110810.binetflow.labels.gz
+      md5: 2596558e22ac484fc0f92b489cf4c434
+      size: 66410453
+    - path: rawdata/ctu-13/capture20110810.binetflow.labels.gz
+      md5: 2596558e22ac484fc0f92b489cf4c434
+      size: 66410453
+    - path: rawdata/ctu-13/capture20110811.binetflow.labels.gz
+      md5: 8d94db21ec8fbf83ace6b58a445b15ed
+      size: 42601328
+    - path: rawdata/ctu-13/capture20110811.binetflow.labels.gz
+      md5: 8d94db21ec8fbf83ace6b58a445b15ed
+      size: 42601328
+    - path: rawdata/ctu-13/capture20110812.binetflow.labels.gz
+      md5: dbbd2d8d29dd333a85be2b589c3fe49a
+      size: 98402171
+    - path: rawdata/ctu-13/capture20110815-2.binetflow.labels.gz
+      md5: f942b618770d441c365f977823d2d01c
+      size: 3035001
+    - path: rawdata/ctu-13/capture20110815-3.binetflow.labels.gz
+      md5: afe8676c9783b5a342abd909c6232dd0
+      size: 44293204
+    - path: rawdata/ctu-13/capture20110815.binetflow.labels.gz
+      md5: 8c936d2dec3ae87620a87eac2de92656
+      size: 25841068
+    - path: rawdata/ctu-13/capture20110816-2.binetflow.labels.gz
+      md5: bf274c3bd1ce5b32a80d0dfdb562451d
+      size: 2667584
+    - path: rawdata/ctu-13/capture20110816-3.binetflow.labels.gz
+      md5: 46c13a0817b6b30f26128e07c252d8af
+      size: 65769344
+    - path: rawdata/ctu-13/capture20110816.binetflow.labels.gz
+      md5: 00bf988897522de574dd717bef9ef3d2
+      size: 12674580
+    - path: rawdata/ctu-13/capture20110817.binetflow.labels.gz
+      md5: 04ab45c1c3d54836e393b12424c7ffd2
+      size: 48814127
+    - path: rawdata/ctu-13/capture20110818-2.binetflow.labels.gz
+      md5: 96e2bb927476cbd129273f39b88dd88f
+      size: 2457277
+    - path: rawdata/ctu-13/capture20110818.binetflow.labels.gz
+      md5: fc8b843ab9d804e96a65c402b338e696
+      size: 29588426
+    - path: rawdata/ctu-13/capture20110819.binetflow.labels.gz
+      md5: ef7eb2056a53713b27fb3b4d4b03edfc
+      size: 7599601
+    outs:
+    - path: data/ncol
+      md5: 6aa7671be173ad9ffebcedb589d155f5.dir
+      size: 234186046
+      nfiles: 13

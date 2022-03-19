@@ -3,12 +3,10 @@ suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(tidyr))
 suppressPackageStartupMessages(library(igraph))
 
-
-
-#' Convert Netflow data file to pajek graph format
+#' Convert Netflow data file to graph 
 #'
 #' @param input_file a neflow file
-#' @return a dataframe with 4 tuples
+#' @return a igraph object
 #' @export
 #'
 #' @examples
