@@ -1,10 +1,26 @@
 stages:
-  convert:
-    cmd: Rscript code/R/convert_net2graph.R --input rawdata/ctu-13/capture20110810.binetflow.labels.gz
-      --output data/pajek/capture20110810.binetflow.pajek
-    deps:
-    - code/R/convert_net2graph.R
+  generate_ncol:
+   cmd: bash code/bash/convert_net2graph_all.sh
+
+   deps:
+    - code/bash/convert_net2graph_all.sh
+    - code/R/scripts/convert_net2graph_cmd.R
+    - code/R/functions/convert_net2graph.R
     - rawdata/ctu-13/capture20110810.binetflow.labels.gz
-    outs:
-    - data/pajek:
+    - rawdata/ctu-13/capture20110811.binetflow.labels.gz
+    - rawdata/ctu-13/capture20110818.binetflow.labels.gz
+    - rawdata/ctu-13/capture20110812.binetflow.labels.gz
+    - rawdata/ctu-13/capture20110810.binetflow.labels.gz
+    - rawdata/ctu-13/capture20110817.binetflow.labels.gz
+    - rawdata/ctu-13/capture20110816.binetflow.labels.gz
+    - rawdata/ctu-13/capture20110819.binetflow.labels.gz
+    - rawdata/ctu-13/capture20110815.binetflow.labels.gz
+    - rawdata/ctu-13/capture20110816-3.binetflow.labels.gz
+    - rawdata/ctu-13/capture20110811.binetflow.labels.gz
+    - rawdata/ctu-13/capture20110815-2.binetflow.labels.gz
+    - rawdata/ctu-13/capture20110818-2.binetflow.labels.gz
+    - rawdata/ctu-13/capture20110815-3.binetflow.labels.gz
+    - rawdata/ctu-13/capture20110816-2.binetflow.labels.gz
+   outs:
+    - data/ncol:
         persist: true
