@@ -7,5 +7,7 @@
 
 [pyg](https://www.pyg.org/) Graph neural networks algorithms using pythorch
 
+[graph-tools](https://graph-tool.skewed.de/)  Efficient Python (with a core written in C) for manipulation and statistical analysis of graphs. 
+
 ## for R
-[igraph]()
+[igraph](https://igraph.org) old but robust library written in C with bindings for python and R
