@@ -16,17 +16,17 @@ stages:
       size: 10284700
       nfiles: 1
   generate_ncol:
-    cmd: bash code/bash/convert_net2graph_all.sh
+    cmd: bash code/bash/convert_net2ncol_all.sh
     deps:
-    - path: code/R/functions/convert_net2graph.R
-      md5: 9b27bc6626c45c420a9f8b8eb348d779
-      size: 1554
-    - path: code/R/scripts/convert_net2graph_cmd.R
-      md5: 621ea880cbb449796a1f8311bb8759ee
-      size: 897
-    - path: code/bash/convert_net2graph_all.sh
-      md5: 565ef5b66a07b059d04017eb227f8fa2
-      size: 1098
+    - path: code/R/functions/convert_net2ncol.R
+      md5: a17147e741ac65df1a6a9693fc659cf0
+      size: 1604
+    - path: code/R/scripts/convert_net2ncol_cmd.R
+      md5: 08dd770adb9fb85eaa1d468842afa37c
+      size: 1419
+    - path: code/bash/convert_net2ncol_all.sh
+      md5: ad41e07fe74582571f8f3c641929d6fa
+      size: 1097
     - path: rawdata/ctu-13/capture20110810.binetflow.labels.gz
       md5: 2596558e22ac484fc0f92b489cf4c434
       size: 66410453
@@ -74,6 +74,6 @@ stages:
       size: 7599601
     outs:
     - path: data/ncol
-      md5: 6aa7671be173ad9ffebcedb589d155f5.dir
-      size: 234186046
-      nfiles: 13
+      md5: bd81292033caf27623c23a2e5cbee8bc.dir
+      size: 453561316
+      nfiles: 26

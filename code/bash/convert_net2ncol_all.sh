@@ -1,6 +1,6 @@
 #!/bin/bash
 R_exe="Rscript"
-script_name="code/R/scripts/convert_net2graph_cmd.R"
+script_name="code/R/scripts/convert_net2ncol_cmd.R"
 cmd_exe="$R_exe $script_name"
 outputdir="data/ncol/"
 
