@@ -3,7 +3,6 @@ R_exe="Rscript"
 script_name="code/R/scripts/convert_net2ncol_cmd.R"
 cmd_exe="$R_exe $script_name"
 outputdir="data/ncol/"
-
 netflow_files=" 
 rawdata/ctu-13/capture20110810.binetflow.labels.gz
 rawdata/ctu-13/capture20110811.binetflow.labels.gz
@@ -18,6 +17,9 @@ rawdata/ctu-13/capture20110817.binetflow.labels.gz
 rawdata/ctu-13/capture20110818-2.binetflow.labels.gz
 rawdata/ctu-13/capture20110818.binetflow.labels.gz
 rawdata/ctu-13/capture20110819.binetflow.labels.gz "
+
+#echo "[bash] cleaning metrics files"
+#>metrics/generate_ncol.yaml
 
 echo "[bash] converting to ncol"
 for netflow in `echo $netflow_files`

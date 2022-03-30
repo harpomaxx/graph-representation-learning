@@ -35,8 +35,11 @@ if (opt$input %>% is.null() || opt$output %>% is.null()){
   
   net_graph<-read_graph(opt$input, format='ncol')
   bc_f <- calculate_bc(net_graph)
+  #bc_f<-data.frame(a=1:10,b=21:30,c=41:50)
+  #Sys.sleep(5)
   ## Save features
-  dir.create(dirname(opt$output), showWarnings = FALSE)
+  dir.create(dirname(opt$output), showWarnings = FALSE, recursive = TRUE)
   write_csv(bc_f %>% as.data.frame()  %>% tibble::rownames_to_column("node")
             ,file = opt$output)
+  write(x = "",paste0("bc.",Sys.getpid(),".end"))
 }

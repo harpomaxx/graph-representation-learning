@@ -22,58 +22,77 @@ stages:
       md5: a17147e741ac65df1a6a9693fc659cf0
       size: 1604
     - path: code/R/scripts/convert_net2ncol_cmd.R
-      md5: 08dd770adb9fb85eaa1d468842afa37c
-      size: 1419
+      md5: bc851067fe5012364d5b90613ffdb062
+      size: 2279
     - path: code/bash/convert_net2ncol_all.sh
-      md5: ad41e07fe74582571f8f3c641929d6fa
-      size: 1097
-    - path: rawdata/ctu-13/capture20110810.binetflow.labels.gz
-      md5: 2596558e22ac484fc0f92b489cf4c434
-      size: 66410453
-    - path: rawdata/ctu-13/capture20110810.binetflow.labels.gz
-      md5: 2596558e22ac484fc0f92b489cf4c434
-      size: 66410453
-    - path: rawdata/ctu-13/capture20110811.binetflow.labels.gz
-      md5: 8d94db21ec8fbf83ace6b58a445b15ed
-      size: 42601328
-    - path: rawdata/ctu-13/capture20110811.binetflow.labels.gz
-      md5: 8d94db21ec8fbf83ace6b58a445b15ed
-      size: 42601328
-    - path: rawdata/ctu-13/capture20110812.binetflow.labels.gz
-      md5: dbbd2d8d29dd333a85be2b589c3fe49a
-      size: 98402171
-    - path: rawdata/ctu-13/capture20110815-2.binetflow.labels.gz
-      md5: f942b618770d441c365f977823d2d01c
-      size: 3035001
-    - path: rawdata/ctu-13/capture20110815-3.binetflow.labels.gz
-      md5: afe8676c9783b5a342abd909c6232dd0
-      size: 44293204
-    - path: rawdata/ctu-13/capture20110815.binetflow.labels.gz
-      md5: 8c936d2dec3ae87620a87eac2de92656
-      size: 25841068
-    - path: rawdata/ctu-13/capture20110816-2.binetflow.labels.gz
-      md5: bf274c3bd1ce5b32a80d0dfdb562451d
-      size: 2667584
-    - path: rawdata/ctu-13/capture20110816-3.binetflow.labels.gz
-      md5: 46c13a0817b6b30f26128e07c252d8af
-      size: 65769344
-    - path: rawdata/ctu-13/capture20110816.binetflow.labels.gz
-      md5: 00bf988897522de574dd717bef9ef3d2
-      size: 12674580
-    - path: rawdata/ctu-13/capture20110817.binetflow.labels.gz
-      md5: 04ab45c1c3d54836e393b12424c7ffd2
-      size: 48814127
-    - path: rawdata/ctu-13/capture20110818-2.binetflow.labels.gz
-      md5: 96e2bb927476cbd129273f39b88dd88f
-      size: 2457277
-    - path: rawdata/ctu-13/capture20110818.binetflow.labels.gz
-      md5: fc8b843ab9d804e96a65c402b338e696
-      size: 29588426
-    - path: rawdata/ctu-13/capture20110819.binetflow.labels.gz
-      md5: ef7eb2056a53713b27fb3b4d4b03edfc
-      size: 7599601
+      md5: f57a56885df02bc1d765735ef20cd4de
+      size: 1164
+    - path: rawdata/ctu-13/
+      md5: fbfbecb0943ab91605e7d227ea7c1a0c.dir
+      size: 450157078
+      nfiles: 28
     outs:
     - path: data/ncol
-      md5: bd81292033caf27623c23a2e5cbee8bc.dir
+      md5: 8549018de551d5b9cdfcc56832d1a55d.dir
       size: 453561316
       nfiles: 26
+    - path: metrics/
+      md5: 99c510dd7ffa82c9a7d4464ccbc25646.dir
+      size: 1630
+      nfiles: 13
+  calculate_bc:
+    cmd: bash code/bash/calculate_bc_all.sh
+    deps:
+    - path: code/R/functions/calculate_bc.R
+      md5: cb09859db7260e8c7a1a5d195498bdfb
+      size: 893
+    - path: code/R/scripts/calculate_bc_cmd.R
+      md5: d2be62cf00460ede4c999e4810814ad5
+      size: 1749
+    - path: code/bash/calculate_bc_all.sh
+      md5: 525a6fc5130a83959c09d8e56d88ff75
+      size: 1657
+    - path: data/ncol/capture20110810.binetflow.labels-positive-weights.ncol
+      md5: e0c98c4ca13f114f801e83e1a3095758
+      size: 39393672
+    - path: data/ncol/capture20110811.binetflow.labels-positive-weights.ncol
+      md5: fda9d4eda28335ceeb34d0be62359e53
+      size: 28030062
+    - path: data/ncol/capture20110812.binetflow.labels-positive-weights.ncol
+      md5: 36d1e533439df93eb9499a3650f5d51a
+      size: 29730310
+    - path: data/ncol/capture20110815-2.binetflow.labels-positive-weights.ncol
+      md5: fdf480bba0c1db3fe15b840d9b1b3eeb
+      size: 2714624
+    - path: data/ncol/capture20110815-3.binetflow.labels-positive-weights.ncol
+      md5: 9fa9f8958c70f24be771cc91b6e4b981
+      size: 21305076
+    - path: data/ncol/capture20110815.binetflow.labels-positive-weights.ncol
+      md5: 428c6abdb45e59d89975b1bf3a4480a9
+      size: 12531064
+    - path: data/ncol/capture20110816-2.binetflow.labels-positive-weights.ncol
+      md5: 5881fe732bce697121ea09574d99f593
+      size: 2497271
+    - path: data/ncol/capture20110816-3.binetflow.labels-positive-weights.ncol
+      md5: 52d49d1fefdca547ba916ad18149b0fd
+      size: 26247558
+    - path: data/ncol/capture20110816.binetflow.labels-positive-weights.ncol
+      md5: 74166dc60339153205334f1608cf27ce
+      size: 7296901
+    - path: data/ncol/capture20110817.binetflow.labels-positive-weights.ncol
+      md5: 70014ec28e2f7ba543d8abed0836f2b5
+      size: 26847740
+    - path: data/ncol/capture20110818-2.binetflow.labels-positive-weights.ncol
+      md5: bb9b585f94fd0476925fb74356aaa0c3
+      size: 2727674
+    - path: data/ncol/capture20110818.binetflow.labels-positive-weights.ncol
+      md5: a6de3357ecc4afc38dc4826fbf16de73
+      size: 14033519
+    - path: data/ncol/capture20110819.binetflow.labels-positive-weights.ncol
+      md5: b7fa03b90c818275e7c5f47410683b2f
+      size: 6019799
+    outs:
+    - path: data/features/bc
+      md5: 3f371ea34431cf62586c514b997bb1d9.dir
+      size: 52428585
+      nfiles: 13
