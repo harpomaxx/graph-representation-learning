@@ -16,7 +16,7 @@ calculate_lcc <- function (igraph_obj) {
   message("[R] Calculating LCC")
   igraph_obj <- igraph::as.undirected(igraph_obj, mode="collapse")
   
-  lcc <- igraph::transitivity(igraph_obj, type = "local", isolates = "zero")
+  lcc <- igraph::transitivity(igraph_obj, type = "local", isolates = "zero" ,weights = NULL)
   stop <- Sys.time()
   message("[R] Total time elapsed: ",difftime(stop,start,units = "hour"))
   lcc

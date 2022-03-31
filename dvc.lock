@@ -65,8 +65,8 @@ stages:
     cmd: bash code/bash/calculate_features_all.sh -i data/ncol/ -o data/features/all/
     deps:
     - path: code/R/functions/calculate_features.R
-      md5: 46158586bdcf1865d5ce16162288a637
-      size: 734
+      md5: 5da6c1b842c4a6efdf0fcf3defd7e297
+      size: 750
     - path: code/R/scripts/calculate_features_cmd.R
       md5: be48299e5f895cefdba5cd03bf1d6ce0
       size: 1205
