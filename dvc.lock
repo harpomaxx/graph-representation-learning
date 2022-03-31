@@ -79,6 +79,6 @@ stages:
       nfiles: 26
     outs:
     - path: data/features/all/
-      md5: a358658b124fb7b0e10d3e803c0e6641.dir
-      size: 27957871
+      md5: 6468af4b53f1ec3527eb12bb062e7988.dir
+      size: 27957881
       nfiles: 13
