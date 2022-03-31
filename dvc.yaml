@@ -1,13 +1,21 @@
+vars:
+  - base:
+      netflowdir: rawdata/ctu-13/
+      ncoldir: data/ncol/
+  - features:
+      bcdir: data/features/bc/
+      dir: data/features/all/
+
 stages:
   generate_ncol:
-   cmd: bash code/bash/convert_net2ncol_all.sh
+   cmd: bash code/bash/convert_net2ncol_all.sh  -o ${base.ncoldir} -i ${base.netflowdir}
    deps:
     - code/bash/convert_net2ncol_all.sh
     - code/R/scripts/convert_net2ncol_cmd.R
     - code/R/functions/convert_net2ncol.R
-    - rawdata/ctu-13/
+    - ${base.netflowdir}
    outs:
-    - data/ncol
+    - ${base.ncoldir}
    metrics:
     - metrics/:
         persist: true
@@ -15,24 +23,27 @@ stages:
         
   calculate_bc:
    deps:
-        - code/bash/calculate_bc_all.sh
-        - code/R/functions/calculate_bc.R
-        - code/R/scripts/calculate_bc_cmd.R
-        - data/ncol/capture20110810.binetflow.labels-positive-weights.ncol
-        - data/ncol/capture20110811.binetflow.labels-positive-weights.ncol
-        - data/ncol/capture20110812.binetflow.labels-positive-weights.ncol
-        - data/ncol/capture20110815-2.binetflow.labels-positive-weights.ncol
-        - data/ncol/capture20110815-3.binetflow.labels-positive-weights.ncol
-        - data/ncol/capture20110815.binetflow.labels-positive-weights.ncol
-        - data/ncol/capture20110816-2.binetflow.labels-positive-weights.ncol
-        - data/ncol/capture20110816-3.binetflow.labels-positive-weights.ncol
-        - data/ncol/capture20110816.binetflow.labels-positive-weights.ncol
-        - data/ncol/capture20110817.binetflow.labels-positive-weights.ncol
-        - data/ncol/capture20110818-2.binetflow.labels-positive-weights.ncol
-        - data/ncol/capture20110818.binetflow.labels-positive-weights.ncol
-        - data/ncol/capture20110819.binetflow.labels-positive-weights.ncol
-   cmd: bash code/bash/calculate_bc_all.sh
+    - code/bash/calculate_bc_all.sh
+    - code/R/functions/calculate_bc.R
+    - code/R/scripts/calculate_bc_cmd.R
+    - ${base.ncoldir}
+        
+   cmd: bash code/bash/calculate_bc_all.sh -i ${base.ncoldir} -o ${features.bcdir}
       
    outs:
-        - data/features/bc
+    - ${features.bcdir}:
+        persist: true
+            
+  calculate_features:
+   deps:
+    - code/bash/calculate_features_all.sh
+    - code/R/functions/calculate_features.R
+    - code/R/scripts/calculate_features_cmd.R
+    - ${base.ncoldir}
+        
+   cmd: bash code/bash/calculate_features_all.sh -i ${base.ncoldir} -o ${features.dir}
+      
+   outs:
+    - ${features.dir}:
+        persist: true
       

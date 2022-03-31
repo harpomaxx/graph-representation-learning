@@ -8,7 +8,7 @@ suppressPackageStartupMessages(library(dplyr))
 
 
 
-source("code/R/functions/calculate_bc.R")
+source("code/R/functions/calculate_features.R")
 
 option_list <- list(
   make_option("--input", action="store", type="character", help = "Set the name of the input ncol file"),
@@ -21,10 +21,12 @@ if (opt$input %>% is.null() || opt$output %>% is.null()){
   quit()
 }else{
   net_graph<-read_graph(opt$input, format='ncol')
-  bc_f <- calculate_bc(net_graph)
+  features_f <- calculate_features(net_graph)
   ## Save features
   dir.create(dirname(opt$output), showWarnings = FALSE, recursive = TRUE)
-  write_csv(bc_f %>% as.data.frame()  %>% tibble::rownames_to_column("node")
+  features_f <- features_f %>% as.data.frame()  %>% tibble::rownames_to_column("node")
+  names(features_f) <- c("node","lcc")
+  write_csv(features_f
             ,file = opt$output)
-  write(x = "",paste0("bc.",Sys.getpid(),".end"))
+  write(x = "",paste0("features.",Sys.getpid(),".end"))
 }

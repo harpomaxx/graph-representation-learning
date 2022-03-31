@@ -2,22 +2,30 @@
 R_exe="Rscript"
 script_name="code/R/scripts/convert_net2ncol_cmd.R"
 cmd_exe="$R_exe $script_name"
-outputdir="data/ncol/"
-netflow_files=" 
-rawdata/ctu-13/capture20110810.binetflow.labels.gz
-rawdata/ctu-13/capture20110811.binetflow.labels.gz
-rawdata/ctu-13/capture20110812.binetflow.labels.gz
-rawdata/ctu-13/capture20110815-2.binetflow.labels.gz
-rawdata/ctu-13/capture20110815-3.binetflow.labels.gz
-rawdata/ctu-13/capture20110815.binetflow.labels.gz
-rawdata/ctu-13/capture20110816-2.binetflow.labels.gz
-rawdata/ctu-13/capture20110816-3.binetflow.labels.gz
-rawdata/ctu-13/capture20110816.binetflow.labels.gz
-rawdata/ctu-13/capture20110817.binetflow.labels.gz
-rawdata/ctu-13/capture20110818-2.binetflow.labels.gz
-rawdata/ctu-13/capture20110818.binetflow.labels.gz
-rawdata/ctu-13/capture20110819.binetflow.labels.gz "
+usage() { echo "$0: [-i <inputdir>] [-o <outputdir>]" 1>&2; exit 1; }
+while getopts ":i:o:" arg; do
+    case "${arg}" in
+        i)
+            inputdir=${OPTARG}
+            ;;
+        o)
+            outputdir=${OPTARG}
+            ;;
+        *)
+            usage
+            ;;
+    esac
+done
+shift $((OPTIND-1))
 
+if [ "$outputdir" == "" ] || [ "$inputdir" == "" ] ;then 
+  echo "[] Parameters missing. Please use --h for look at available parameters."
+else
+echo "[bash] outputdir: " $outputdir
+echo "[bash] intputdir: " $inputdir
+fi
+
+netflow_files=`find $inputdir -name "*binetflow.labels.gz"`
 #echo "[bash] cleaning metrics files"
 #>metrics/generate_ncol.yaml
 

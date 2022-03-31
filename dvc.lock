@@ -16,7 +16,7 @@ stages:
       size: 10284700
       nfiles: 1
   generate_ncol:
-    cmd: bash code/bash/convert_net2ncol_all.sh
+    cmd: bash code/bash/convert_net2ncol_all.sh  -o data/ncol/ -i rawdata/ctu-13/
     deps:
     - path: code/R/functions/convert_net2ncol.R
       md5: a17147e741ac65df1a6a9693fc659cf0
@@ -25,74 +25,60 @@ stages:
       md5: bc851067fe5012364d5b90613ffdb062
       size: 2279
     - path: code/bash/convert_net2ncol_all.sh
-      md5: f57a56885df02bc1d765735ef20cd4de
-      size: 1164
+      md5: 1c8da8c1fab49560392b5a9ab28a15b6
+      size: 1044
     - path: rawdata/ctu-13/
       md5: fbfbecb0943ab91605e7d227ea7c1a0c.dir
       size: 450157078
       nfiles: 28
     outs:
-    - path: data/ncol
+    - path: data/ncol/
       md5: 8549018de551d5b9cdfcc56832d1a55d.dir
       size: 453561316
       nfiles: 26
     - path: metrics/
-      md5: 99c510dd7ffa82c9a7d4464ccbc25646.dir
-      size: 1630
-      nfiles: 13
+      md5: 8b814a56857a7cdc964a4eac09cd8c82.dir
+      size: 3383
+      nfiles: 27
   calculate_bc:
-    cmd: bash code/bash/calculate_bc_all.sh
+    cmd: bash code/bash/calculate_bc_all.sh -i data/ncol/ -o data/features/bc/
     deps:
     - path: code/R/functions/calculate_bc.R
       md5: cb09859db7260e8c7a1a5d195498bdfb
       size: 893
     - path: code/R/scripts/calculate_bc_cmd.R
-      md5: d2be62cf00460ede4c999e4810814ad5
-      size: 1749
+      md5: 31793533cb9d6976e390bb9805c4710d
+      size: 1109
     - path: code/bash/calculate_bc_all.sh
-      md5: 525a6fc5130a83959c09d8e56d88ff75
-      size: 1657
-    - path: data/ncol/capture20110810.binetflow.labels-positive-weights.ncol
-      md5: e0c98c4ca13f114f801e83e1a3095758
-      size: 39393672
-    - path: data/ncol/capture20110811.binetflow.labels-positive-weights.ncol
-      md5: fda9d4eda28335ceeb34d0be62359e53
-      size: 28030062
-    - path: data/ncol/capture20110812.binetflow.labels-positive-weights.ncol
-      md5: 36d1e533439df93eb9499a3650f5d51a
-      size: 29730310
-    - path: data/ncol/capture20110815-2.binetflow.labels-positive-weights.ncol
-      md5: fdf480bba0c1db3fe15b840d9b1b3eeb
-      size: 2714624
-    - path: data/ncol/capture20110815-3.binetflow.labels-positive-weights.ncol
-      md5: 9fa9f8958c70f24be771cc91b6e4b981
-      size: 21305076
-    - path: data/ncol/capture20110815.binetflow.labels-positive-weights.ncol
-      md5: 428c6abdb45e59d89975b1bf3a4480a9
-      size: 12531064
-    - path: data/ncol/capture20110816-2.binetflow.labels-positive-weights.ncol
-      md5: 5881fe732bce697121ea09574d99f593
-      size: 2497271
-    - path: data/ncol/capture20110816-3.binetflow.labels-positive-weights.ncol
-      md5: 52d49d1fefdca547ba916ad18149b0fd
-      size: 26247558
-    - path: data/ncol/capture20110816.binetflow.labels-positive-weights.ncol
-      md5: 74166dc60339153205334f1608cf27ce
-      size: 7296901
-    - path: data/ncol/capture20110817.binetflow.labels-positive-weights.ncol
-      md5: 70014ec28e2f7ba543d8abed0836f2b5
-      size: 26847740
-    - path: data/ncol/capture20110818-2.binetflow.labels-positive-weights.ncol
-      md5: bb9b585f94fd0476925fb74356aaa0c3
-      size: 2727674
-    - path: data/ncol/capture20110818.binetflow.labels-positive-weights.ncol
-      md5: a6de3357ecc4afc38dc4826fbf16de73
-      size: 14033519
-    - path: data/ncol/capture20110819.binetflow.labels-positive-weights.ncol
-      md5: b7fa03b90c818275e7c5f47410683b2f
-      size: 6019799
+      md5: 4255f7ea9c9ec47855aeb9eb4393eb95
+      size: 1388
+    - path: data/ncol/
+      md5: 8549018de551d5b9cdfcc56832d1a55d.dir
+      size: 453561316
+      nfiles: 26
     outs:
-    - path: data/features/bc
+    - path: data/features/bc/
       md5: 3f371ea34431cf62586c514b997bb1d9.dir
       size: 52428585
+      nfiles: 13
+  calculate_features:
+    cmd: bash code/bash/calculate_features_all.sh -i data/ncol/ -o data/features/all/
+    deps:
+    - path: code/R/functions/calculate_features.R
+      md5: 46158586bdcf1865d5ce16162288a637
+      size: 734
+    - path: code/R/scripts/calculate_features_cmd.R
+      md5: be48299e5f895cefdba5cd03bf1d6ce0
+      size: 1205
+    - path: code/bash/calculate_features_all.sh
+      md5: 07383b4625fe27d30ad102da66b33962
+      size: 1333
+    - path: data/ncol/
+      md5: 8549018de551d5b9cdfcc56832d1a55d.dir
+      size: 453561316
+      nfiles: 26
+    outs:
+    - path: data/features/all/
+      md5: a358658b124fb7b0e10d3e803c0e6641.dir
+      size: 27957871
       nfiles: 13
