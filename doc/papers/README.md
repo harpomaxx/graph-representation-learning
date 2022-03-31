@@ -13,6 +13,8 @@ The BibTex file contains all the relevant papers and books on the topic.
 ### Local Cluster Coefficient
 
 1.  [Clustering in Complex Directed Networks](https://arxiv.org/pdf/physics/0612169.pdf)
+2.  [Generalizations of the clustering coefficient to weighted complex network](https://www.dropbox.com/s/qxlt45d3eyliblm/a9.pdf?dl=0)
+3.  [Directed clustering in weighted networks: A new perspective](https://www.dropbox.com/s/2z33ua7wuox4sa3/j.chaos.2017.12.007.pdf?dl=0)
 
 ## Miscellaneous
 
