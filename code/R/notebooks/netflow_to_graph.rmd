@@ -150,6 +150,7 @@ graphs_trength_out %>% order() %>% head()
 ## calculate BC
 ```{r}
 library(doMC)
+
 registerDoMC(8)
 #bc<-betweenness(net, e = E(net), directed = TRUE)
 start<-Sys.time()
@@ -169,9 +170,55 @@ stop-start
 
 ## Plot (do not use for big graphs)
 ```{r fig.height=12, fig.width=12}
-plot(net, edge.arrow.size=.1,
-     vertex.label=NA,
-     vertex.size=1,
-     edge.curved=.1)
+library(readr)
+library(dplyr)
+net_df <- read_delim("../../../test-mini-2.ncol", delim= " ", col_names = F)
+net_df <- net_df %>% filter(X3 == 0)
+
+net_df <- net_df %>% sample_frac(0.1)
+
+net <- igraph::graph_from_data_frame(d=net_df, directed = T)
+ layout = layout.drl
+  V(net)$size = degree(net) /max(degree(net))
+  graph_plot<-plot(net, 
+       edge.arrow.size=0.01,
+       edge.width= 0.01,
+       #edge.width=E(net)$weight,
+       vertex.label=NA,
+       edge.curved=1, 
+        layout = layout,
+    # layout=layout.fruchterman.reingold,
+      # asp =9/16
+       )
+```
+
+```{r}
+library(igraph)
+  net<-read_graph("../../../test-mini-2.ncol", format='ncol')
+  
+  
+  delete_edges(net, which(E(net)$weight==0))
+  
+  source("../functions/calculate_bc.R")
+  
+  bc<-calculate_bc(net)
+  #save(bc,file="bc.rdata")
+  
+  #load("bc.rdata")
+bc %>% as.data.frame() %>% tibble::rownames_to_column("node")
+```
+
+```{r}
+library(reticulate)
+```
+
+```{python}
+import networkx as nx
+nx_graph = nx.read_weighted_edgelist(path="/home/harpo/Dropbox/ongoing-work/git-repos/graph-representation-learning/data/ncol/capture20110810.binetflow.labels.ncol")
+nx_graph.edges
+```
+
+```{r}
+
 ```
 
