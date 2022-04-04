@@ -20,7 +20,7 @@ if (opt$input %>% is.null() || opt$output %>% is.null()){
   message("[] Parameters missing. Please use --help for look at available parameters.")
   quit()
 }else{
-  net_graph<-read_graph(opt$input, format='ncol')
+  net_graph<-read_graph(opt$input, format='ncol', directed = TRUE)
   bc_f <- calculate_bc(net_graph)
   ## Save features
   dir.create(dirname(opt$output), showWarnings = FALSE, recursive = TRUE)

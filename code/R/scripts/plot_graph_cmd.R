@@ -16,7 +16,7 @@ if (is.null(opt$input) || is.null(opt$output)){
   quit()
 }else{
   message("[R] Reading `ncol` file ", opt$input ," as dataframe.")
-  #net<- igraph::read_graph(opt$input,format='ncol')
+  #net<- igraph::read_graph(opt$input,format='ncol', directed = TRUE)
   net_df <- readr::read_delim(opt$input, delim= " ", col_names = F, 
                               col_types = cols(col_character(),
                                                col_character(),

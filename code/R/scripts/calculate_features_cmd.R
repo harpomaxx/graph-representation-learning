@@ -20,12 +20,10 @@ if (opt$input %>% is.null() || opt$output %>% is.null()){
   message("[] Parameters missing. Please use --help for look at available parameters.")
   quit()
 }else{
-  net_graph<-read_graph(opt$input, format='ncol')
+  net_graph<-read_graph(opt$input, format='ncol', directed = TRUE)
   features_f <- calculate_features(net_graph)
   ## Save features
   dir.create(dirname(opt$output), showWarnings = FALSE, recursive = TRUE)
-  features_f <- features_f %>% as.data.frame()  %>% tibble::rownames_to_column("node")
-  names(features_f) <- c("node","lcc")
   write_csv(features_f
             ,file = opt$output)
   write(x = "",paste0("features.",Sys.getpid(),".end"))
