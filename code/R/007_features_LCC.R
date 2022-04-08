@@ -66,7 +66,10 @@ print(time_LCC)
 
 ##### Create a DataFrame and store it in csv file #####
 start_store <- proc.time()
-df <- data.frame(LCC) %>% as_tibble(rownames = "node")
+
+names(LCC) <- names(V(g))
+df <- unlist(LCC) %>% data.frame(LCC = .) %>% as_tibble(rownames = "node")
+
 write.csv(df, csvName, row.names = FALSE)
 end_store <- proc.time()
 
