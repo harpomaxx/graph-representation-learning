@@ -19,12 +19,12 @@ done
 shift $((OPTIND-1))
 
 if [ "$outputdir" == "" ] || [ "$inputdir" == "" ] ;then 
-  echo "[] Parameters missing. Please use --h for look at available parameters."
+  echo "[] Parameters missing. Please use --h for look at available parameters."  
+  exit 
 else
 echo "[bash] outputdir: " $outputdir
 echo "[bash] intputdir: " $inputdir
 fi
-
 ncol_files=`find $inputdir -name "*positive*.ncol"`
 echo "[bash] Calculating Features"
 for ncol in `echo $ncol_files`

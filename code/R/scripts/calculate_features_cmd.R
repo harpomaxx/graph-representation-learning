@@ -1,13 +1,9 @@
 #!/bin/Rscript
 #  calculate graph features  
-
 suppressPackageStartupMessages(library(optparse))
 suppressPackageStartupMessages(library(igraph))
 suppressPackageStartupMessages(library(readr))
 suppressPackageStartupMessages(library(dplyr))
-
-
-
 source("code/R/functions/calculate_features.R")
 
 option_list <- list(
@@ -21,10 +17,13 @@ if (opt$input %>% is.null() || opt$output %>% is.null()){
   quit()
 }else{
   net_graph<-read_graph(opt$input, format='ncol', directed = TRUE)
+  message("[R] Calculating features for ", opt$input)
   features_f <- calculate_features(net_graph)
+  
   ## Save features
   dir.create(dirname(opt$output), showWarnings = FALSE, recursive = TRUE)
   write_csv(features_f
             ,file = opt$output)
   write(x = "",paste0("features.",Sys.getpid(),".end"))
+  message("[R] File stored in ", opt$output)
 }

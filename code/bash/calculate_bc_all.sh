@@ -32,7 +32,7 @@ for ncol in `echo $ncol_files`
 do
 	echo "[bash] calculating bc for $ncol"
 	echo $cmd_exe --input $ncol --output $outputdir`basename $ncol .ncol`.bc
-	#$cmd_exe --input $ncol --output $outputdir`basename $ncol .ncol`.bc &>bc_`basename $ncol`.log &
+	$cmd_exe --input $ncol --output $outputdir`basename $ncol .ncol`.bc &>bc_`basename $ncol`.log &
 
 done
 

@@ -38,7 +38,6 @@ calculate_lcc <- function (igraph_obj) {
 calculate_degree <- function (igraph_obj) {
   start <- Sys.time()
   message("[R] Calculating Degree")
-  igraph_obj <- igraph::as.directed(igraph_obj)
   degree <-
     list(
       "degree_in" = unname(degree(igraph_obj, V(igraph_obj) , mode = "in")),
@@ -51,9 +50,38 @@ calculate_degree <- function (igraph_obj) {
   degree
 }
 
+
+#' calculate alpha-centrality for igraph object
+#'
+#' @param igraph_obj a igraph_obj file
+#' @return
+#' @export
+#'
+#' @examples
+#'
+calculate_ac <- function (igraph_obj) {
+  start <- Sys.time()
+  message("[R] Calculating ac")
+  ac <-
+    list(
+      "ac" = unname(igraph::alpha.centrality(igraph_obj,
+                                                    alpha = 0.01,
+                                                    exo = 1,
+                                                    weights = NULL
+                                                    ))
+    )
+  stop <- Sys.time()
+  message("[R] Total time elapsed: ", difftime(stop, start, units = "hour"))
+  ac
+}
+
+
 calculate_features <- function(igraph_obj) {
-  features_f<-cbind(as.data.frame(calculate_lcc(igraph_obj)),
-        as.data.frame(calculate_degree(igraph_obj)))
-  names(features_f) <-c("LCC","ID","OD","IDW","ODW")
+  features_f<-cbind(
+        as.data.frame(calculate_lcc(igraph_obj)),
+        as.data.frame(calculate_degree(igraph_obj)),
+        as.data.frame(calculate_ac(igraph_obj))
+        )
+  names(features_f) <-c("LCC","ID","OD","IDW","ODW","AC")
   features_f
 }
