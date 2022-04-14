@@ -2,10 +2,13 @@ vars:
   - base:
       netflowdir: rawdata/ctu-13/
       ncoldir: data/ncol/
+      labelsdir: rawdata/labels/
   - features:
       bcdir: data/features/bc/
       dir: data/features/all/
-
+      csvdir: data/features/csv/
+  - dataset:
+      dir: data/labeled/
 stages:
   generate_ncol:
    cmd: bash code/bash/convert_net2ncol_all.sh  -o ${base.ncoldir} -i ${base.netflowdir}
@@ -46,4 +49,31 @@ stages:
    outs:
     - ${features.dir}:
         persist: true
+  merge_features:
+    deps:
+    - code/bash/merge_features_all.sh
+    - code/R/scripts/merge_features_cmd.R
+    - ${features.bcdir}
+    - ${features.dir}
+    
+    cmd: bash code/bash/merge_features_all.sh -f ${features.dir} -b ${features.bcdir} -o ${features.csvdir}
+   
+    outs:
+    - ${features.csvdir}:
+        persist: true
+        
+  label_dataset:
+    deps:
+    - code/bash/label_dataset_all.sh
+    - code/R/scripts/label_dataset_cmd.R
+    - code/R/functions/label_dataset.R
+    - ${features.csvdir}
+    - ${base.labelsdir}
+    
+    cmd: bash code/bash/label_dataset_all.sh -i ${features.csvdir} -l ${base.labelsdir} -o ${dataset.dir}
+   
+    outs:
+    - ${dataset.dir}:
+        persist: true
+    
       

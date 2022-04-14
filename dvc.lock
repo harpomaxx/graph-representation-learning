@@ -47,38 +47,87 @@ stages:
       md5: cb09859db7260e8c7a1a5d195498bdfb
       size: 893
     - path: code/R/scripts/calculate_bc_cmd.R
-      md5: 31793533cb9d6976e390bb9805c4710d
-      size: 1109
+      md5: 4d351c4bf89c6853455c71bbe25b6546
+      size: 1127
     - path: code/bash/calculate_bc_all.sh
-      md5: 4255f7ea9c9ec47855aeb9eb4393eb95
-      size: 1388
+      md5: 8467cb1c083d964ab357ff1a03f076b7
+      size: 1387
     - path: data/ncol/
       md5: 8549018de551d5b9cdfcc56832d1a55d.dir
       size: 453561316
       nfiles: 26
     outs:
     - path: data/features/bc/
-      md5: 3f371ea34431cf62586c514b997bb1d9.dir
-      size: 52428585
+      md5: a87c9ec1f4eef4152d6c74b0055d43f8.dir
+      size: 52274699
       nfiles: 13
   calculate_features:
     cmd: bash code/bash/calculate_features_all.sh -i data/ncol/ -o data/features/all/
     deps:
     - path: code/R/functions/calculate_features.R
-      md5: 5da6c1b842c4a6efdf0fcf3defd7e297
-      size: 750
+      md5: aad33d589d7686a7f1e28714145dd75b
+      size: 2449
     - path: code/R/scripts/calculate_features_cmd.R
-      md5: be48299e5f895cefdba5cd03bf1d6ce0
-      size: 1205
+      md5: 2aef7d6c6c7a11dacbf908e6562044a2
+      size: 1194
     - path: code/bash/calculate_features_all.sh
-      md5: 07383b4625fe27d30ad102da66b33962
-      size: 1333
+      md5: 4ee44c81d973fe4020d1c5e21adca2b7
+      size: 1342
     - path: data/ncol/
       md5: 8549018de551d5b9cdfcc56832d1a55d.dir
       size: 453561316
       nfiles: 26
     outs:
     - path: data/features/all/
-      md5: 6468af4b53f1ec3527eb12bb062e7988.dir
-      size: 27957881
+      md5: 869c61700bcf43bebd1a709f8184a6b8.dir
+      size: 103270383
+      nfiles: 14
+  merge_features:
+    cmd: bash code/bash/merge_features_all.sh -f data/features/all/ -b data/features/bc/
+      -o data/features/csv/
+    deps:
+    - path: code/R/scripts/merge_features_cmd.R
+      md5: 59aea8be39fc8238944dc8e28a473a13
+      size: 1467
+    - path: code/bash/merge_features_all.sh
+      md5: 359b450522c5f25a4d8d875f09060e7f
+      size: 1834
+    - path: data/features/all/
+      md5: 869c61700bcf43bebd1a709f8184a6b8.dir
+      size: 103270383
+      nfiles: 14
+    - path: data/features/bc/
+      md5: a87c9ec1f4eef4152d6c74b0055d43f8.dir
+      size: 52274699
+      nfiles: 13
+    outs:
+    - path: data/features/csv/
+      md5: 8defe248aca361ff1bc9fc5129477792.dir
+      size: 155352583
+      nfiles: 13
+  label_dataset:
+    cmd: bash code/bash/label_dataset_all.sh -i data/features/csv/ -l rawdata/labels/
+      -o data/labeled/
+    deps:
+    - path: code/R/functions/label_dataset.R
+      md5: 6c7405107e13b2f0de54800df46bf990
+      size: 638
+    - path: code/R/scripts/label_dataset_cmd.R
+      md5: 05527c9f4b7372dc479ad83f67e74c25
+      size: 1471
+    - path: code/bash/label_dataset_all.sh
+      md5: cd5ec3f348c9e202f154e0454ac82bda
+      size: 1826
+    - path: data/features/csv/
+      md5: 8defe248aca361ff1bc9fc5129477792.dir
+      size: 155352583
+      nfiles: 13
+    - path: rawdata/labels/
+      md5: 39eb70e73e2d332eec5b6df32ac6350e.dir
+      size: 10250
+      nfiles: 13
+    outs:
+    - path: data/labeled/
+      md5: 68b4187579877212faf650099dd8ab08.dir
+      size: 178032772
       nfiles: 13

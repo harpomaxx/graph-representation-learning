@@ -138,9 +138,15 @@ E(net)$weight <-links %>% select(TotPkts)  %>% unname() %>% unlist()
 # Calculate degree and weight degree
 ```{r}
 graph_degree_in<-degree(net,V(net),mode = "in")
-graphs_trength_in<-strength(net,V(net),mode = "in")
+graph_degree_out<-strength(net,V(net),mode = "out")
 graphs_trength_out<-strength(net,V(net),mode = "out")
 graphs_trength_out %>% order() %>% head()
+
+df1<-graph_degree_in %>% as.data.frame()
+df2<-graph_degree_out %>% as.data.frame()
+df2
+V(net) %>% as.list()
+graphs_trength_in %>% unname()
 ```
 
 
@@ -208,6 +214,165 @@ library(igraph)
 bc %>% as.data.frame() %>% tibble::rownames_to_column("node")
 ```
 
+
+```{r}
+library(parallel)
+computeLocalClusteringCoefficient <- function(graph, vertex) {
+    # Calculate LCC for a vertex in graph
+   
+    neighbourhood <- ego(graph, order = 1, nodes = vertex, mode = "all", mindist = 1) 
+    k <- ego_size(graph, order = 1, nodes = vertex, mode = "all", mindist = 1) 
+    # https://igraph.org/r/doc/ego.html
+    # see (1)
+    numberTriplets <- 0
+    neighbourhood<-as.vector(neighbourhood[[1]])
+    for (p in neighbourhood) {
+        for (q in neighbourhood) {
+            if (igraph::are_adjacent(graph, p, q)) {
+                # https://igraph.org/r/doc/are_adjacent.html
+                # see (2)
+                numberTriplets <- numberTriplets + 1
+            }
+        }
+    }
+    print(numberTriplets)
+    if (k <= 1) {
+        return(0.0)
+    } else {
+        return(numberTriplets / (k * (k - 1)))
+    }
+}
+```
+
+```{r}
+net<-read_graph("../../../data/ncol/capture20110815-2.binetflow.labels-positive-weights.ncol", 
+                
+                format='ncol', directed = TRUE)
+##### Calculate Local Clustering Coefficient (LCC) #####
+LCC <- mclapply(V(net), function(x) computeLocalClusteringCoefficient(net,x),mc.cores = 10)
+lcc<-computeLocalClusteringCoefficient(net,V(net)[4])
+lcc
+```
+
+```{r}
+library(parallel)
+computeLocalClusteringCoefficient <- function(graph, vertex) {
+    # Calculate LCC for a vertex in graph
+   
+    neighbourhood <- ego(graph, order = 1, nodes = vertex, mode = "all", mindist = 1) 
+    k <- ego_size(graph, order = 1, nodes = vertex, mode = "all", mindist = 1) 
+    # https://igraph.org/r/doc/ego.html
+    # see (1)
+    numberTriplets <- 0
+    neighbourhood<-as.vector(neighbourhood[[1]])
+    for (p in neighbourhood) {
+        for (q in neighbourhood) {
+            if (igraph::are_adjacent(graph, p, q)) {
+                # https://igraph.org/r/doc/are_adjacent.html
+                # see (2)
+                numberTriplets <- numberTriplets + 1
+            }
+        }
+    }
+    print(numberTriplets)
+    if (k <= 1) {
+        return(0.0)
+    } else {
+        return(numberTriplets / (k * (k - 1)))
+    }
+}
+net <- make_full_graph(4000)
+lcc<-computeLocalClusteringCoefficient(net,V(net)[1])
+
+vertex <- V(net)[1]
+neighbourhood <-
+  ego(
+    net,
+    order = 1,
+    nodes = vertex,
+    mode = "all",
+    mindist = 1
+  )
+neighbourhood <- neighbourhood[[1]]
+k <-
+  ego_size(
+    net,
+    order = 1,
+    nodes = vertex,
+    mode = "all",
+    mindist = 1
+  )
+k
+d <- mclapply(neighbourhood,
+              function(p) {
+                purrr::map2(neighbourhood, p,
+                            function(q, p) {
+                              if (igraph::are_adjacent(net, p, q)) {
+                                1
+                              }
+                            })
+              }
+              , mc.cores = 10)
+numberTriplets <- d %>% unlist() %>% sum()
+print(numberTriplets)
+
+ if (k <= 1){
+        lcc2<-0
+ } else{ 
+    lcc2<-(numberTriplets / (k * (k - 1)))
+  }
+lcc
+lcc2
+```
+
+
+
+```{r}
+library(igraph)
+source("../functions/calculate_features.R")
+    
+net<-read_graph("../../../data/ncol/capture20110815-2.binetflow.labels-positive-weights.ncol", format='ncol', directed = TRUE)
+igraph::is.weighted(net)
+net <- igraph::as.directed(net)
+net_un<-igraph::as.undirected(net, mode = "collapse")
+
+lcc <-igraph::transitivity(net_un,
+                         type = "local",
+                         isolates = "zero" ,
+                         weights = NULL)
+  lcc<-calculate_lcc(net_un)
+  features<-calculate_degree(net)
+  
+  lcc %>% as.data.frame()
+  lcc %>% as.data.frame() %>% rownames_to_column()
+  #save(bc,file="bc.rdata")
+  
+which(lcc != 0)  
+  #load("bc.rdata")
+bc %>% as.data.frame() %>% tibble::rownames_to_column("node")
+
+igraph::is_directed(net_un)
+igraph::is_directed(net)
+igraph::read.graph()
+```
+
+
+```{r}
+library(dplyr)
+features<- readr::read_csv("../../../data/features/all/capture20110810.binetflow.labels-positive-weights.features")
+bc_feature <- readr::read_csv("../../../data/features/bc/capture20110810.binetflow.labels-positive-weights.bc")
+names(bc_feature)<-c("node","BC")
+features_f<-cbind(bc_feature,features)
+labels <- readr::read_csv("../../../rawdata/labels/capture20110810.nodes.labels",col_names = F)
+labels_normal <- labels %>% dplyr::filter(X3 == "normal") %>% select(X1) %>% unname() %>% unlist()
+
+features_f$label<-"normal"
+features_f %>% mutate(label=ifelse(labels %in% labels_normal, "normal", "infected"))
+```
+
+
+
+
 ```{r}
 library(reticulate)
 ```
@@ -219,6 +384,6 @@ nx_graph.edges
 ```
 
 ```{r}
-
+list("a" = runif(100), "b" = runif(100)) %>% as.data.frame()
 ```
 
