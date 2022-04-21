@@ -364,10 +364,12 @@ bc_feature <- readr::read_csv("../../../data/features/bc/capture20110810.binetfl
 names(bc_feature)<-c("node","BC")
 features_f<-cbind(bc_feature,features)
 labels <- readr::read_csv("../../../rawdata/labels/capture20110810.nodes.labels",col_names = F)
-labels_normal <- labels %>% dplyr::filter(X3 == "normal") %>% select(X1) %>% unname() %>% unlist()
+nodes_infected <- labels %>% dplyr::filter(X3 == "infected") %>% select(X1) %>% unname() %>% unlist()
 
 features_f$label<-"normal"
-features_f %>% mutate(label=ifelse(labels %in% labels_normal, "normal", "infected"))
+features_f %>% group_by(node) %>% count()
+dataset<-features_f %>% mutate(label=ifelse(node %in% nodes_infected, "infected", "normal"))
+dataset %>% filter(node == "147.32.84.165")
 ```
 
 

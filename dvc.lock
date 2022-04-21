@@ -110,8 +110,8 @@ stages:
       -o data/labeled/
     deps:
     - path: code/R/functions/label_dataset.R
-      md5: 6c7405107e13b2f0de54800df46bf990
-      size: 638
+      md5: 22122250508906df1af49f847f82197c
+      size: 875
     - path: code/R/scripts/label_dataset_cmd.R
       md5: 05527c9f4b7372dc479ad83f67e74c25
       size: 1471
@@ -128,6 +128,6 @@ stages:
       nfiles: 13
     outs:
     - path: data/labeled/
-      md5: 68b4187579877212faf650099dd8ab08.dir
-      size: 178032772
+      md5: 6c0c210aab3b04944c24c463c9f1e371.dir
+      size: 190992376
       nfiles: 13

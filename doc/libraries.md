@@ -16,4 +16,6 @@
 
 [pyg](https://www.pyg.org/) Graph neural networks algorithms using pythorch
 
+[pyg](https://pytorch-geometric.readthedocs.io/en/latest/)  pytorch-gemotric: a library built upon PyTorch to easily write and train Graph Neural Networks (GNNs) for a wide range of applications related to structured data. A colab notebook with examples is available [here](https://colab.research.google.com/drive/14GPEIR7uRz50K9E_p9OUwjSOig0ZOB_E?usp=sharing)
+
 
