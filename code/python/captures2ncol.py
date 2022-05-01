@@ -18,7 +18,7 @@ for root, dirs, files in os.walk("../../rawdata/ctu-13"):
             continue
 
         df=pd.read_csv('../../rawdata/ctu-13/'+ctuName)
-
+        #Get relevant information
         df=df[["SrcAddr","DstAddr","TotBytes","SrcBytes"]]
         df["DstBytes"]=df["TotBytes"]-df["SrcBytes"]
         df.drop('TotBytes',inplace=True, axis=1)
@@ -26,22 +26,23 @@ for root, dirs, files in os.walk("../../rawdata/ctu-13"):
                 
         idx=df['SrcAddr'].transform(ip_read)>df['DstAddr'].transform(ip_read) #Indexes where src>dst ips
 
-        aux=df[idx]['SrcBytes'].copy() #Reorder bytes according to new address order
+        aux=df[idx]['SrcBytes'].copy() #Reorder bytes according to new address order: (smaller ip: src);(bigger:dst)
         df.loc[idx,'SrcBytes']=df[idx]['DstBytes']
         df.loc[idx,'DstBytes']=aux
 
-        aux=df[idx]['SrcAddr'].copy()  #Reorders addresses
+        aux=df[idx]['SrcAddr'].copy()  #Reorders addresses (smaller ip: src);(bigger:dst)
         df.loc[idx,'SrcAddr']=df[idx]['DstAddr']
         df.loc[idx,'DstAddr']=aux
 
-        df_gb=df.groupby(['SrcAddr','DstAddr'])
+        df_gb=df.groupby(['SrcAddr','DstAddr']) #Group src and dst bytes of communications with same src and dst addresses
         df_agg=df_gb.agg({
             'SrcBytes':'sum',
             'DstBytes':'sum'
         })
         df=df_agg.reset_index()
 
-
+        #BUILD NCOL ARCHIVE
+        #Every row in the dataframe has to be a single unidirectional communication
         df21=df[["SrcAddr","DstAddr","SrcBytes"]].rename(columns={"SrcBytes":"Bytes"})#src to dst edges
         df22=df[["DstAddr","SrcAddr","DstBytes"]].rename(columns={"DstBytes":"Bytes","DstAddr":"SrcAddr","SrcAddr":"DstAddr"})#Aristas dst a src
         df = pd.concat([df21,df22], axis=0)
