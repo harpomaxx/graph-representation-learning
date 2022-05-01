@@ -31,7 +31,7 @@ ODW=g.strength(mode="out",weights="weight")
 LCC=g.transitivity_local_undirected(mode='zero') #There exists a Weighted alternative. In the paper they don't consider weights
 #Mode zero because we can't make use of nan in a column for ML.(Verify)
 
-#BC=g.betweenness(directed=True,weights="weight")    #Calculation of BC with igraph (not optimal)
+#BC=g.betweenness(directed=True,weights="weight")    #Calculation of non normalized weighted BC with igraph (not optimal)
 #Notebook:    9 min
 #samson running time: 6min???
 with open("BC_gt.json", 'r') as f:

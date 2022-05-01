@@ -14,7 +14,7 @@ g= gt.load_graph("../../data/graphml/"+ctuName+".graphml")
  #g.list_properties()
  #gt.graph_draw(g, vertex_text=g.vertex_index)
 
-bv, be = gt.betweenness(g,weight=g.ep.Bytes,norm=False)
+bv, be = gt.betweenness(g,weight=g.ep.Bytes,norm=True) 
 # Notebook 2:12 min vs Notebook igraph aprox 9min
 
 BC=[]
