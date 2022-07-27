@@ -3,9 +3,9 @@
 
 # Note: code adapted from https://github.com/jgrapht/jgrapht/blob/6aba8e81053660997fe681c50974c07e312027d1/jgrapht-core/src/main/java/org/jgrapht/alg/scoring/ClusteringCoefficient.java#L168
 
-
 suppressPackageStartupMessages(library(igraph))
 suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(data.table))
 
 args <- commandArgs(TRUE)
 ncolName <- paste(args[1], "_noZeroB.ncol", sep = "")
@@ -70,7 +70,7 @@ start_store <- proc.time()
 names(LCC) <- names(V(g))
 df <- unlist(LCC) %>% data.frame(LCC = .) %>% as_tibble(rownames = "node")
 
-write.csv(df, csvName, row.names = FALSE)
+fwrite(df, csvName)
 end_store <- proc.time()
 
 time_store = end_store - start_store
@@ -94,4 +94,5 @@ print(time_store)
 
 # (2)
 # https://github.com/jgrapht/jgrapht/blob/6aba8e81053660997fe681c50974c07e312027d1/jgrapht-core/src/main/java/org/jgrapht/Graph.java#L273
+
 
