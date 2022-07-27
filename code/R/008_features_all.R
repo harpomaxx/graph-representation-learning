@@ -2,6 +2,7 @@
 
 suppressPackageStartupMessages(library(igraph))
 suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(readr))
 
 args <- commandArgs(TRUE)
 
@@ -11,7 +12,7 @@ csvName <- paste(args[1], "_features.csv", sep = "")
 which_capture <- args[1]
 path_d_dw <- paste(args[2], which_capture, "_D_DW.csv", sep = "")
 path_bc <- paste(args[3], which_capture, "_BC.csv", sep = "")
-path_lcc <- paste(args[4], which_capture, "_LCC.csv", sep = "")
+path_lcc <- paste(args[4], which_capture, "_LCC_undirected_weighted.csv", sep = "")
 path_ac <- paste(args[5], which_capture, "_AC.csv", sep = "")
 
 
@@ -46,10 +47,10 @@ labeling <- function(capture, node) {
 
 ##### Load graph and features #####
 g <- read_graph(file = ncolName, format = "ncol", directed = T)
-d_dw <- read.csv(path_d_dw)
-bc <- read.csv(path_bc)
-lcc <- read.csv(path_lcc)
-ac <- read.csv(path_ac)
+d_dw <- read_csv(path_d_dw, show_col_types = FALSE)
+bc <- read_csv(path_bc, show_col_types = FALSE)
+lcc <- read_csv(path_lcc, show_col_types = FALSE)
+ac <- read_csv(path_ac, show_col_types = FALSE)
 
 g_vertices <- V(g)
 verticesNames <- names(g_vertices)
@@ -60,5 +61,5 @@ labels <- unlist(tmp) %>% data.frame(label = .) %>% as_tibble(rownames = "node")
 
 
 df <- left_join(d_dw, bc, by = "node") %>% left_join(., lcc, by = "node") %>% left_join(., ac, by = "node") %>% left_join(., labels, by = "node")
-write.csv(df, csvName, row.names = FALSE)
+write_csv(df, csvName)
 
