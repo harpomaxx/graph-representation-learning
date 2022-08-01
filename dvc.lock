@@ -79,9 +79,9 @@ stages:
       nfiles: 26
     outs:
     - path: data/features/all/
-      md5: 869c61700bcf43bebd1a709f8184a6b8.dir
-      size: 103270383
-      nfiles: 14
+      md5: 59ad083bddcb458819cdd2bd8b323849.dir
+      size: 103077871
+      nfiles: 13
   merge_features:
     cmd: bash code/bash/merge_features_all.sh -f data/features/all/ -b data/features/bc/
       -o data/features/csv/
@@ -93,17 +93,17 @@ stages:
       md5: 359b450522c5f25a4d8d875f09060e7f
       size: 1834
     - path: data/features/all/
-      md5: 869c61700bcf43bebd1a709f8184a6b8.dir
-      size: 103270383
-      nfiles: 14
+      md5: 59ad083bddcb458819cdd2bd8b323849.dir
+      size: 103077871
+      nfiles: 13
     - path: data/features/bc/
       md5: a87c9ec1f4eef4152d6c74b0055d43f8.dir
       size: 52274699
       nfiles: 13
     outs:
     - path: data/features/csv/
-      md5: 8defe248aca361ff1bc9fc5129477792.dir
-      size: 155352583
+      md5: 9a621fe981706e0787fceb06cf149c70.dir
+      size: 155127535
       nfiles: 13
   label_dataset:
     cmd: bash code/bash/label_dataset_all.sh -i data/features/csv/ -l rawdata/labels/
@@ -119,8 +119,8 @@ stages:
       md5: cd5ec3f348c9e202f154e0454ac82bda
       size: 1826
     - path: data/features/csv/
-      md5: 8defe248aca361ff1bc9fc5129477792.dir
-      size: 155352583
+      md5: 9a621fe981706e0787fceb06cf149c70.dir
+      size: 155127535
       nfiles: 13
     - path: rawdata/labels/
       md5: 39eb70e73e2d332eec5b6df32ac6350e.dir
@@ -128,6 +128,6 @@ stages:
       nfiles: 13
     outs:
     - path: data/labeled/
-      md5: 6c0c210aab3b04944c24c463c9f1e371.dir
-      size: 190992376
+      md5: d9b4f13c5d3f125b8039cb7e4b26fe0f.dir
+      size: 190767314
       nfiles: 13
