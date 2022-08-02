@@ -7,8 +7,10 @@ vars:
       bcdir: data/features/bc/
       dir: data/features/all/
       csvdir: data/features/csv/
+      normdir: data/features/norm/
   - dataset:
       dir: data/labeled/
+      normdir: data/labelednorm/
 stages:
   generate_ncol:
    cmd: bash code/bash/convert_net2ncol_all.sh  -o ${base.ncoldir} -i ${base.netflowdir}
@@ -61,7 +63,22 @@ stages:
     outs:
     - ${features.csvdir}:
         persist: true
-        
+  
+  normalize_features:
+    deps:
+    - code/bash/normalize_features_all.sh
+    - code/R/scripts/normalize_features_cmd.R
+    - code/R/functions/normalize_feature.R
+    - ${features.csvdir}
+    - ${base.ncoldir}
+    
+    cmd: bash code/bash/normalize_features_all.sh -n ${base.ncoldir} -f ${features.csvdir} -o ${features.normdir}
+    
+    outs:
+    - ${features.normdir}:
+        persist: true
+    
+     
   label_dataset:
     deps:
     - code/bash/label_dataset_all.sh
@@ -74,6 +91,20 @@ stages:
    
     outs:
     - ${dataset.dir}:
+        persist: true
+        
+  label_dataset_normalized:
+    deps:
+    - code/bash/label_dataset_all.sh
+    - code/R/scripts/label_dataset_cmd.R
+    - code/R/functions/label_dataset.R
+    - ${features.normdir}
+    - ${base.labelsdir}
+    
+    cmd: bash code/bash/label_dataset_all.sh -i ${features.normdir} -l ${base.labelsdir} -o ${dataset.normdir}
+   
+    outs:
+    - ${dataset.normdir}:
         persist: true
     
       
