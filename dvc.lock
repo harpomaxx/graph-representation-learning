@@ -131,3 +131,55 @@ stages:
       md5: d9b4f13c5d3f125b8039cb7e4b26fe0f.dir
       size: 190767314
       nfiles: 13
+  normalize_features:
+    cmd: bash code/bash/normalize_features_all.sh -n data/ncol/ -f data/features/csv/
+      -o data/features/norm/
+    deps:
+    - path: code/R/functions/normalize_feature.R
+      md5: 84fdc76cf7ca7535a83c2c4bfb93a25c
+      size: 2074
+    - path: code/R/scripts/normalize_features_cmd.R
+      md5: 006d86f4f0c921e087397c24a3e8681e
+      size: 2561
+    - path: code/bash/normalize_features_all.sh
+      md5: 9e72aef5f378f1ea67f1d87259fd5e12
+      size: 1713
+    - path: data/features/csv/
+      md5: 9a621fe981706e0787fceb06cf149c70.dir
+      size: 155127535
+      nfiles: 13
+    - path: data/ncol/
+      md5: 8549018de551d5b9cdfcc56832d1a55d.dir
+      size: 453561316
+      nfiles: 26
+    outs:
+    - path: data/features/norm/
+      md5: d3ca9bb84169d9c5754a6da9ef39b225.dir
+      size: 383282586
+      nfiles: 13
+  label_dataset_normalized:
+    cmd: bash code/bash/label_dataset_all.sh -i data/features/norm/ -l rawdata/labels/
+      -o data/labelednorm/
+    deps:
+    - path: code/R/functions/label_dataset.R
+      md5: 22122250508906df1af49f847f82197c
+      size: 875
+    - path: code/R/scripts/label_dataset_cmd.R
+      md5: 05527c9f4b7372dc479ad83f67e74c25
+      size: 1471
+    - path: code/bash/label_dataset_all.sh
+      md5: cd5ec3f348c9e202f154e0454ac82bda
+      size: 1826
+    - path: data/features/norm/
+      md5: d3ca9bb84169d9c5754a6da9ef39b225.dir
+      size: 383282586
+      nfiles: 13
+    - path: rawdata/labels/
+      md5: 39eb70e73e2d332eec5b6df32ac6350e.dir
+      size: 10250
+      nfiles: 13
+    outs:
+    - path: data/labelednorm/
+      md5: 71d84d65f8b93236b15d4ed4b89df20b.dir
+      size: 417304960
+      nfiles: 13

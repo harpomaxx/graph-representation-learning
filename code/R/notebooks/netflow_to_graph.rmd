@@ -372,6 +372,42 @@ dataset<-features_f %>% mutate(label=ifelse(node %in% nodes_infected, "infected"
 dataset %>% filter(node == "147.32.84.165")
 ```
 
+```{r}
+normalizeFeature <- function(featureTarget, neighbourhood, k, index) {
+    numberNeighbours <- k[index]
+    localNeighbourhood <- neighbourhood[index][[1]]
+    suma <- 0
+    for(i in localNeighbourhood) {
+        suma <- suma + featureTarget[i, 2]
+    }
+    
+    if(suma != 0) {
+        mu <- suma / numberNeighbours
+        return(as.numeric(featureTarget[index,2]/mu))
+    } else {
+        return(as.numeric(featureTarget[index,2]))
+    }
+}
+```
+
+```{r}
+library(igraph)
+library(dplyr)
+net<-read_graph("../../../data/ncol/capture20110815-2.binetflow.labels-positive-weights.ncol", format='ncol',directed = TRUE)
+neighbourhood <- ego(net, order = 1, nodes = V(net), mode = "all", mindist = 1) 
+names(neighbourhood) <- V(net)$name
+k<-purrr::map(neighbourhood, function(x) length(x))
+features <- readr::read_csv("../../../data/features/csv/capture20110815-2.binetflow.labels-positive-weights.csv")
+features_names<-colnames(features)[2:ncol(features)]
+res <- list()
+for(feature in features_names){
+  featuretarget <- features |> select(node,feature)
+   res[[feature]] <- sapply(seq(1,length(V(net))), function(x) normalizeFeature(featureTarget = featuretarget,neighbourhood,k,x ))
+}
+
+
+res %>% as.data.frame() %>% tibble::add_column(node=features$node) %>% select(names(features))
+```
 
 
 
