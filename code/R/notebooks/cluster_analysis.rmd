@@ -1,0 +1,144 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+
+```{r message=FALSE, warning=FALSE}
+rm(list = ls()) # clean global environment
+cat("\014")  # clean the console
+```
+
+
+
+```{r setup, warning=FALSE}
+# CHANGE TO THE CORRESPONDING WORKING DIRECTORY
+knitr::opts_knit$set(root.dir = '/home/harpo/Dropbox/ongoing-work/git-repos/graph-representation-learning/')
+```
+
+```{r message=FALSE, warning=FALSE}
+library(readr)
+library(dplyr)
+library(ggplot2)
+```
+# Read dataset
+```{r}
+features_data<-rbind(
+  readr::read_csv("data/labeled/capture20110810.binetflow.labels-positive-weights.labeled.csv"),
+  readr::read_csv("data/labeled/capture20110811.binetflow.labels-positive-weights.labeled.csv"),
+  readr::read_csv("data/labeled/capture20110812.binetflow.labels-positive-weights.labeled.csv"),
+  readr::read_csv("data/labeled/capture20110815.binetflow.labels-positive-weights.labeled.csv"),
+  readr::read_csv("data/labeled/capture20110815-2.binetflow.labels-positive-weights.labeled.csv"),
+  readr::read_csv("data/labeled/capture20110815-3.binetflow.labels-positive-weights.labeled.csv"),
+  readr::read_csv("data/labeled/capture20110816.binetflow.labels-positive-weights.labeled.csv"),
+  readr::read_csv("data/labeled/capture20110816-2.binetflow.labels-positive-weights.labeled.csv"),
+  readr::read_csv("data/labeled/capture20110816-3.binetflow.labels-positive-weights.labeled.csv"),
+  readr::read_csv("data/labeled/capture20110818.binetflow.labels-positive-weights.labeled.csv"),
+  readr::read_csv("data/labeled/capture20110818-2.binetflow.labels-positive-weights.labeled.csv"),
+  readr::read_csv("data/labeled/capture20110819.binetflow.labels-positive-weights.labeled.csv")
+)
+features_data
+
+```
+# Read F-norm dataset
+
+```{r}
+features_norm_data<-rbind(
+  readr::read_csv("data/labelednorm/capture20110810.binetflow.labels-positive-weights.ncol.normalized.labeled.csv"),
+  readr::read_csv("data/labelednorm/capture20110811.binetflow.labels-positive-weights.ncol.normalized.labeled.csv"),
+  readr::read_csv("data/labelednorm/capture20110812.binetflow.labels-positive-weights.ncol.normalized.labeled.csv"),
+  readr::read_csv("data/labelednorm/capture20110815.binetflow.labels-positive-weights.ncol.normalized.labeled.csv"),
+  readr::read_csv("data/labelednorm/capture20110815-2.binetflow.labels-positive-weights.ncol.normalized.labeled.csv"),
+  readr::read_csv("data/labelednorm/capture20110815-3.binetflow.labels-positive-weights.ncol.normalized.labeled.csv"),
+  readr::read_csv("data/labelednorm/capture20110816.binetflow.labels-positive-weights.ncol.normalized.labeled.csv"),
+  readr::read_csv("data/labelednorm/capture20110816-2.binetflow.labels-positive-weights.ncol.normalized.labeled.csv"),
+  readr::read_csv("data/labelednorm/capture20110816-3.binetflow.labels-positive-weights.ncol.normalized.labeled.csv"),
+  readr::read_csv("data/labelednorm/capture20110818.binetflow.labels-positive-weights.ncol.normalized.labeled.csv"),
+  readr::read_csv("data/labelednorm/capture20110818-2.binetflow.labels-positive-weights.ncol.normalized.labeled.csv"),
+  readr::read_csv("data/labelednorm/capture20110819.binetflow.labels-positive-weights.ncol.normalized.labeled.csv")
+)
+features_norm_data
+
+```
+
+# Select Features
+```{r}
+#selected_features <- c("ID","OD","IDW","ODW","BC")
+selected_features <- c("ID","OD","IDW","ODW","BC")
+selected_features <- c("AC")
+```
+
+```{r}
+features_data %>% group_by(label) %>% count()
+features_data  %>% filter (ID != 0 & ID !=1) %>% filter(ID >=3 ) %>% arrange(desc(ID) )
+
+```
+# Boxplots
+## Features
+```{r fig.height=12, fig.width=12}
+features_data %>% select(any_of(selected_features),"label" ) %>%  reshape2::melt() %>%
+  ggplot()+
+  facet_wrap(~variable,scales = "free_y")+
+  geom_boxplot(aes(y=value,x=label,color=label))+
+  ylim(0,1000)+
+  theme_classic()
+
+#plotly::ggplotly()
+```
+
+
+
+## Normalized Features
+
+```{r}
+features_norm_data %>% select(any_of(selected_features),"label" ) %>% reshape2::melt() %>%
+  ggplot()+
+  facet_wrap(~variable,scales = "free_y")+
+  geom_boxplot(aes(y=value,x=label,color=label))+
+  ylim(0,1000)+
+  theme_classic()
+```
+
+# Clustering
+```{r}
+cluster_data <- kmeans(features_norm_data %>% select(any_of(selected_features)),centers = 50,nstart = 10, iter.max = 1000)
+features_norm_cluster<-data.frame(features_norm_data,cluster=cluster_data$cluster)
+gc()
+```
+
+```{r}
+clusters_size <- features_norm_cluster %>% group_by(cluster) %>% count()
+clusters_size %>% arrange(desc(n))
+begnin_cluster<-clusters_size  %>% arrange(desc(n)) %>% head(1) %>% select(cluster) %>% unlist() %>% unname()
+features_norm_cluster %>% filter(cluster == begnin_cluster) %>% group_by(label) %>% count()
+```
+
+## PCA
+```{r}
+pca_data <- prcomp(features_norm_data %>% select(any_of(selected_features)), center = TRUE, scale. = FALSE)
+```
+
+```{r}
+features_norm_pca_cluster<-data.frame(pca_data$x,
+                                      cluster=cluster_data$cluster,
+                                      label=features_norm_data$label)
+features_norm_pca_cluster
+```
+
+
+
+## Visualize PCA + Clustering
+```{r }
+features_norm_pca_cluster |> sample_frac(0.01) %>%
+  ggplot()+
+  geom_jitter(aes(x=PC1,y=PC2,color=as.factor(cluster)),size=2,alpha=0.2)+
+  theme_classic()+
+  ylim(c(0,150))+
+  theme(legend.position = "")
+plotly::ggplotly()
+```
+
