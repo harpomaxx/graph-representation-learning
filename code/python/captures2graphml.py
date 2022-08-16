@@ -3,6 +3,22 @@ import igraph as ig
 import os
 import ipaddress
 
+def parsearg():
+    parser = OptionParser(usage="usage: %prog [opt] ",
+                          version="%prog 1.0")
+    parser.add_option("-i", "--input",
+                      action="store",
+                      dest="input",
+                      default=False,
+                      help="set name of the input file")
+    parser.add_option("-o", "--output",
+                      action="store", # optional because action defaults to "store"
+                      dest="output",
+                      help="set name of the output file",)
+    (opt, args) = parser.parse_args()
+    return opt
+
+
 def ip_read(ip_str):
     aux_str=ip_str 
     if aux_str.count(":")==5:#For ipaddress to work for 6 bytes directions too
@@ -48,8 +64,7 @@ def capture2graphml(ctuName):
     g = ig.Graph.DataFrame(df,directed=True)
     g.write_graphml("../../data/graphml/"+ctuName+".graphml")
 
-
-
+#Iterative version
 for root, dirs, files in os.walk("../../rawdata/ctu-13"):
     for ctuName in files:
         if(ctuName.find(".dvc")+1 or ctuName.find(".gitignore")+1 or ctuName.find(".md")+1):
