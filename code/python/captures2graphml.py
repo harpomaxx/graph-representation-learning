@@ -30,7 +30,9 @@ def ip_read(ip_str):
 
 def capture2graphml(ctuName):
     df=pd.read_csv('../../rawdata/ctu-13/'+ctuName)
-
+    #Keep the tcp and udp comunications only.
+    df=df[(df['Proto']=='tcp') | (df['Proto']=='udp')]
+    #Keep the columns we need
     df=df[["SrcAddr","DstAddr","TotBytes","SrcBytes"]]
     df["DstBytes"]=df["TotBytes"]-df["SrcBytes"]
     df.drop('TotBytes',inplace=True, axis=1)

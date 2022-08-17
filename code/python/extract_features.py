@@ -67,34 +67,41 @@ if __name__ == '__main__':
         #Get in degree
         ID=g.degree_property_map("in")
         ID_norm=normalize(g,ID)
-        ID_df=pd.DataFrame(ID_norm)
+        ID_df=pd.DataFrame(ID)
+        ID_norm_df=pd.DataFrame(ID_norm)
         #Get out degree
         OD=g.degree_property_map("out")
         OD_norm=normalize(g,OD)
-        OD_df=pd.DataFrame(OD_norm)
+        OD_df=pd.DataFrame(OD)
+        OD_norm_df=pd.DataFrame(OD_norm)
 
         #Get edge property map of weights
         Bytes=g.edge_properties["Bytes"]
         #Get in degree with weight
         IDW=g.degree_property_map("in",weight=Bytes)
         IDW_norm=normalize(g,IDW)
-        IDW_df=pd.DataFrame(IDW_norm)
+        IDW_df=pd.DataFrame(IDW)
+        IDW_norm_df=pd.DataFrame(IDW_norm)
         #Get out degree with weight
         ODW=g.degree_property_map("out",weight=Bytes)
         ODW_norm=normalize(g,ODW)
-        ODW_df=pd.DataFrame(ODW_norm)
+        ODW_df=pd.DataFrame(ODW)
+        ODW_norm_df=pd.DataFrame(ODW_norm)
         #Betweenness centrality
         BV, _ = gt.betweenness(g,weight=Bytes,norm=True)
         BV_norm=normalize(g,BV)
-        BC_df=pd.DataFrame(BV_norm)
+        BC_df=pd.DataFrame(BV)
+        BC_norm_df=pd.DataFrame(BV_norm)
         #Local clustering coefficient
         LCC=gt.local_clustering(g,weight=None)
         LCC_norm=normalize(g,LCC)
-        LCC_df=pd.DataFrame(LCC_norm)
+        LCC_df=pd.DataFrame(LCC)
+        LCC_norm_df=pd.DataFrame(LCC_norm)
         #Alpha centrality
         AC=gt.katz(g,weight=None,norm=False)
         AC_norm=normalize(g,AC)
-        AC_df=pd.DataFrame(AC_norm)
+        AC_df=pd.DataFrame(AC)
+        AC_norm_df=pd.DataFrame(AC_norm)
 
 
         #Get node names
@@ -107,14 +114,18 @@ if __name__ == '__main__':
 
         #Concatenate dataframes
         df=pd.concat([nodes_df,ID_df,OD_df,IDW_df,ODW_df,BC_df,LCC_df,AC_df,labels_df],axis=1)
+        norm_df=pd.concat([nodes_df,ID_norm_df,OD_norm_df,IDW_norm_df,ODW_norm_df,BC_norm_df,LCC_norm_df,AC_norm_df,labels_df],axis=1)
         df.columns=["node","ID","OD","IDW","ODW","BC","LCC","AC","label"]
+        norm_df.columns=["node","ID","OD","IDW","ODW","BC","LCC","AC","label"]
 
         #Labeling the bots
         bots=botnetIP(ctuName) #Botnets in each capture
         for ip in bots:
             df.loc[df["node"] == ip, ["label"]] = 1
+            norm_df.loc[norm_df["node"] == ip, ["label"]] = 1
 
         #Save the dataframe in a csv
         #df.to_csv("../../data/csv/"+ctuName+".csv")
         df.to_csv(opt.output)
+        norm_df.to_csv(opt.output+"_norm.csv")
         print("[Py] Output csv file written")
