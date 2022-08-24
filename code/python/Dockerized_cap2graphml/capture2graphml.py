@@ -1,7 +1,8 @@
 import pandas as pd
 import igraph as ig
-import os
 import ipaddress
+from optparse import OptionParser
+
 
 def parsearg():
     parser = OptionParser(usage="usage: %prog [opt] ",
@@ -10,7 +11,7 @@ def parsearg():
                       action="store",
                       dest="input",
                       default=False,
-                      help="set name of the input file")
+                      help="set name of the ctu capture")
     parser.add_option("-o", "--output",
                       action="store", # optional because action defaults to "store"
                       dest="output",
@@ -29,7 +30,7 @@ def ip_read(ip_str):
 
 
 def capture2graphml(ctuName):
-    df=pd.read_csv('../../rawdata/ctu-13/'+ctuName)
+    df=pd.read_csv('./rawdata/ctu-13/'+ctuName)
     #Keep the tcp and udp comunications only.
     df=df[(df['Proto']=='tcp') | (df['Proto']=='udp')]
     #Keep the columns we need
@@ -64,13 +65,9 @@ def capture2graphml(ctuName):
     df=df.reset_index(drop=True)
 
     g = ig.Graph.DataFrame(df,directed=True)
-    g.write_graphml("../../data/graphml/"+ctuName+".graphml")
+    g.write_graphml("./data/graphml/"+ctuName+".graphml")
 
-#Iterative version
-for root, dirs, files in os.walk("../../rawdata/ctu-13"):
-    for ctuName in files:
-        if(ctuName.find(".dvc")+1 or ctuName.find(".gitignore")+1 or ctuName.find(".md")+1):
-            continue
-        capture2graphml(ctuName)
-        print(ctuName+".graphml"+" done")
-
+if __name__=="__main__":
+    opt=parsearg()
+    capture2graphml(opt.input)
+    print(opt.input+".graphml created")

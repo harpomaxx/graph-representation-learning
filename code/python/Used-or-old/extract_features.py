@@ -126,6 +126,6 @@ if __name__ == '__main__':
 
         #Save the dataframe in a csv
         #df.to_csv("../../data/csv/"+ctuName+".csv")
-        df.to_csv(opt.output)
-        norm_df.to_csv(opt.output+"_norm.csv")
+        df.to_csv(opt.output+".features.csv")
+        norm_df.to_csv(opt.output+".norm.csv")
         print("[Py] Output csv file written")
