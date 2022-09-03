@@ -1,0 +1,4 @@
+outs:
+- md5: 8007c9c18f41b63843dfda8e70fe1e63
+  size: 213440942
+  path: capture20110812.binetflow.labels.gz
