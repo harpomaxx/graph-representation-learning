@@ -16,29 +16,29 @@ stages:
       size: 10284700
       nfiles: 1
   generate_ncol:
-    cmd: bash code/bash/convert_net2ncol_all.sh  -o data/ncol/ -i rawdata/ctu-13/
+    cmd: bash code/bash/convert_net2ncol_all.sh  -o data/ncol/ -i rawdata/ctu-13-2format/
     deps:
     - path: code/R/functions/convert_net2ncol.R
-      md5: a17147e741ac65df1a6a9693fc659cf0
-      size: 1604
+      md5: 0d4a658fec549de77c2f96790ad7cbe9
+      size: 2881
     - path: code/R/scripts/convert_net2ncol_cmd.R
-      md5: bc851067fe5012364d5b90613ffdb062
-      size: 2279
+      md5: a7f769a5c2488a7ab3a4e004e46772b7
+      size: 2284
     - path: code/bash/convert_net2ncol_all.sh
       md5: 1c8da8c1fab49560392b5a9ab28a15b6
       size: 1044
-    - path: rawdata/ctu-13/
-      md5: fbfbecb0943ab91605e7d227ea7c1a0c.dir
-      size: 450157078
-      nfiles: 28
+    - path: rawdata/ctu-13-2format/
+      md5: 9a4f53b78f2028cde6970bfd92984c11.dir
+      size: 967484936
+      nfiles: 27
     outs:
     - path: data/ncol/
-      md5: 8549018de551d5b9cdfcc56832d1a55d.dir
-      size: 453561316
+      md5: 3f89066fbcf448b23b36e5fa1f8ffa9b.dir
+      size: 429022688
       nfiles: 26
     - path: metrics/
-      md5: 8b814a56857a7cdc964a4eac09cd8c82.dir
-      size: 3383
+      md5: 5697bd248b268ee1e9583c679c61a7ff.dir
+      size: 3314
       nfiles: 27
   calculate_bc:
     cmd: bash code/bash/calculate_bc_all.sh -i data/ncol/ -o data/features/bc/
@@ -53,13 +53,13 @@ stages:
       md5: 8467cb1c083d964ab357ff1a03f076b7
       size: 1387
     - path: data/ncol/
-      md5: 8549018de551d5b9cdfcc56832d1a55d.dir
-      size: 453561316
+      md5: 3f89066fbcf448b23b36e5fa1f8ffa9b.dir
+      size: 429022688
       nfiles: 26
     outs:
     - path: data/features/bc/
-      md5: a87c9ec1f4eef4152d6c74b0055d43f8.dir
-      size: 52274699
+      md5: 7eb9626110436063d8d580aaa6f45afe.dir
+      size: 52607058
       nfiles: 13
   calculate_features:
     cmd: bash code/bash/calculate_features_all.sh -i data/ncol/ -o data/features/all/
@@ -74,13 +74,13 @@ stages:
       md5: 4ee44c81d973fe4020d1c5e21adca2b7
       size: 1342
     - path: data/ncol/
-      md5: 8549018de551d5b9cdfcc56832d1a55d.dir
-      size: 453561316
+      md5: 3f89066fbcf448b23b36e5fa1f8ffa9b.dir
+      size: 429022688
       nfiles: 26
     outs:
     - path: data/features/all/
-      md5: 59ad083bddcb458819cdd2bd8b323849.dir
-      size: 103077871
+      md5: 2c6e96e99d00d57468e46bcf2bbb6b2e.dir
+      size: 92476745
       nfiles: 13
   merge_features:
     cmd: bash code/bash/merge_features_all.sh -f data/features/all/ -b data/features/bc/
@@ -93,17 +93,17 @@ stages:
       md5: 359b450522c5f25a4d8d875f09060e7f
       size: 1834
     - path: data/features/all/
-      md5: 59ad083bddcb458819cdd2bd8b323849.dir
-      size: 103077871
+      md5: 2c6e96e99d00d57468e46bcf2bbb6b2e.dir
+      size: 92476745
       nfiles: 13
     - path: data/features/bc/
-      md5: a87c9ec1f4eef4152d6c74b0055d43f8.dir
-      size: 52274699
+      md5: 7eb9626110436063d8d580aaa6f45afe.dir
+      size: 52607058
       nfiles: 13
     outs:
     - path: data/features/csv/
-      md5: 9a621fe981706e0787fceb06cf149c70.dir
-      size: 155127535
+      md5: 6ca9faff6752e11e2120cbc2a52c9010.dir
+      size: 144583466
       nfiles: 13
   label_dataset:
     cmd: bash code/bash/label_dataset_all.sh -i data/features/csv/ -l rawdata/labels/
@@ -119,8 +119,8 @@ stages:
       md5: cd5ec3f348c9e202f154e0454ac82bda
       size: 1826
     - path: data/features/csv/
-      md5: 9a621fe981706e0787fceb06cf149c70.dir
-      size: 155127535
+      md5: 6ca9faff6752e11e2120cbc2a52c9010.dir
+      size: 144583466
       nfiles: 13
     - path: rawdata/labels/
       md5: 39eb70e73e2d332eec5b6df32ac6350e.dir
@@ -128,8 +128,8 @@ stages:
       nfiles: 13
     outs:
     - path: data/labeled/
-      md5: d9b4f13c5d3f125b8039cb7e4b26fe0f.dir
-      size: 190767314
+      md5: d98f89715842f888d6342ca69fd8bab1.dir
+      size: 180223195
       nfiles: 13
   normalize_features:
     cmd: bash code/bash/normalize_features_all.sh -n data/ncol/ -f data/features/csv/
@@ -145,17 +145,17 @@ stages:
       md5: 9e72aef5f378f1ea67f1d87259fd5e12
       size: 1713
     - path: data/features/csv/
-      md5: 9a621fe981706e0787fceb06cf149c70.dir
-      size: 155127535
+      md5: 6ca9faff6752e11e2120cbc2a52c9010.dir
+      size: 144583466
       nfiles: 13
     - path: data/ncol/
-      md5: 8549018de551d5b9cdfcc56832d1a55d.dir
-      size: 453561316
+      md5: 3f89066fbcf448b23b36e5fa1f8ffa9b.dir
+      size: 429022688
       nfiles: 26
     outs:
     - path: data/features/norm/
-      md5: d3ca9bb84169d9c5754a6da9ef39b225.dir
-      size: 383282586
+      md5: 6bf9dbd1ee25de64862322470046eb10.dir
+      size: 384418561
       nfiles: 13
   label_dataset_normalized:
     cmd: bash code/bash/label_dataset_all.sh -i data/features/norm/ -l rawdata/labels/
@@ -171,8 +171,8 @@ stages:
       md5: cd5ec3f348c9e202f154e0454ac82bda
       size: 1826
     - path: data/features/norm/
-      md5: d3ca9bb84169d9c5754a6da9ef39b225.dir
-      size: 383282586
+      md5: 6bf9dbd1ee25de64862322470046eb10.dir
+      size: 384418561
       nfiles: 13
     - path: rawdata/labels/
       md5: 39eb70e73e2d332eec5b6df32ac6350e.dir
@@ -180,6 +180,6 @@ stages:
       nfiles: 13
     outs:
     - path: data/labelednorm/
-      md5: 71d84d65f8b93236b15d4ed4b89df20b.dir
-      size: 417304960
+      md5: c620adcc1d2fbff2946aa5f7297372c6.dir
+      size: 419066111
       nfiles: 13

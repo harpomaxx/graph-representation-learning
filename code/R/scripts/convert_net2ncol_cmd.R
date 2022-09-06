@@ -17,7 +17,7 @@ if (opt$input %>% is.null() || opt$output %>% is.null()){
   message("[] Parameters missing. Please use --help for look at available parameters.")
   quit()
 }else{
-  df_ncol <- convert_net2ncol(input_file = opt$input)
+  df_ncol <- convert_net2ncol_pkts(input_file = opt$input)
   df_ncol_n <- nrow(df_ncol)
   df_ncol_vertex <- rbind(df_ncol$origin,df_ncol$destination) %>% unique() %>% length()
   message("[R] ",df_ncol_n," edges found")

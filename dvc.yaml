@@ -1,6 +1,6 @@
 vars:
   - base:
-      netflowdir: rawdata/ctu-13/
+      netflowdir: rawdata/ctu-13-2format/
       ncoldir: data/ncol/
       labelsdir: rawdata/labels/
   - features:
