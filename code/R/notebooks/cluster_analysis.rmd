@@ -3,10 +3,6 @@ title: "R Notebook"
 output: html_notebook
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
-
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
-
 
 ```{r message=FALSE, warning=FALSE}
 rm(list = ls()) # clean global environment
@@ -68,8 +64,10 @@ features_norm_data
 # Select Features
 ```{r}
 #selected_features <- c("ID","OD","IDW","ODW","BC")
-selected_features <- c("ID","OD","IDW","ODW","BC")
-selected_features <- c("AC")
+selected_features <- c("ID","OD","IDW","ODW","BC","LCC")
+#selected_features <- c("AC")
+
+features_norm_data_2 <- features_norm_data %>% mutate(across(is.numeric,function(x) log(x+10000)))
 ```
 
 ```{r}
@@ -79,14 +77,15 @@ features_data  %>% filter (ID != 0 & ID !=1) %>% filter(ID >=3 ) %>% arrange(des
 ```
 # Boxplots
 ## Features
-```{r fig.height=12, fig.width=12}
-features_data %>% select(any_of(selected_features),"label" ) %>%  reshape2::melt() %>%
+```{r fig.height=10, fig.width=12}
+p_features<-features_data %>% select(any_of(selected_features),"label" ) %>%  reshape2::melt() %>%
   ggplot()+
   facet_wrap(~variable,scales = "free_y")+
   geom_boxplot(aes(y=value,x=label,color=label))+
-  ylim(0,1000)+
+  labs(title="Features")+
+  ylim(-1000,1000)+
   theme_classic()
-
+p_features
 #plotly::ggplotly()
 ```
 
@@ -94,18 +93,20 @@ features_data %>% select(any_of(selected_features),"label" ) %>%  reshape2::melt
 
 ## Normalized Features
 
-```{r}
-features_norm_data %>% select(any_of(selected_features),"label" ) %>% reshape2::melt() %>%
+```{r fig.height=10, fig.width=12}
+p_features_norm<-features_norm_data %>% select(any_of(selected_features),"label" ) %>% reshape2::melt() %>%
   ggplot()+
   facet_wrap(~variable,scales = "free_y")+
   geom_boxplot(aes(y=value,x=label,color=label))+
-  ylim(0,1000)+
+  #ylim(0,1000)+
+  labs(title="Normalized  Features")+
   theme_classic()
+p_features_norm
 ```
 
 # Clustering
 ```{r}
-cluster_data <- kmeans(features_norm_data %>% select(any_of(selected_features)),centers = 50,nstart = 10, iter.max = 1000)
+cluster_data <- kmeans(features_data %>% select(any_of(selected_features)),centers = 100,nstart = 10, iter.max = 1000)
 features_norm_cluster<-data.frame(features_norm_data,cluster=cluster_data$cluster)
 gc()
 ```
@@ -118,11 +119,11 @@ features_norm_cluster %>% filter(cluster == begnin_cluster) %>% group_by(label) 
 ```
 
 ## PCA
-```{r}
+```{r eval=FALSE, include=FALSE}
 pca_data <- prcomp(features_norm_data %>% select(any_of(selected_features)), center = TRUE, scale. = FALSE)
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 features_norm_pca_cluster<-data.frame(pca_data$x,
                                       cluster=cluster_data$cluster,
                                       label=features_norm_data$label)
