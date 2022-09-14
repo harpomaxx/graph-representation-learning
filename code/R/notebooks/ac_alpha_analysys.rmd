@@ -1,0 +1,57 @@
+---
+title: "Analysis of the influence of AC in k-means"
+output: html_notebook
+---
+
+```{r  fig.height=8, fig.width=14}
+p<-yaml::read_yaml("params.yaml")
+kmeans_data_all <- list()
+
+for (alpha in p$calculate_ac$alphas) {
+  kmeans_data<-yaml::read_yaml(paste0("metrics/kmeans/normalized/kmeans_alpha=",alpha,".yaml"))
+   kmeans_data<-kmeans_data |> as.data.frame()
+  kmeans_data$alpha<-alpha
+  kmeans_data_all<-rbind(kmeans_data_all,kmeans_data)
+  
+}
+kmeans_data_all <- kmeans_data_all %>% mutate(`%hob` = (hob/2874213)*100,`%bob`=(bob/24)*100) 
+kmeans_data_all
+kmeans_data_all %>% 
+  ggplot()+
+  facet_wrap(~alpha,ncol=4)+
+  labs(subtitle="%hob and %bob values for normalized dataset.",title="Pkts dataset: Alpha Centrality using different values for alpha")+
+  geom_line(aes(x=k, y = `%hob`,color='hob'))+
+  geom_point(aes(x=k, y = `%hob`,color='hob'))+
+  geom_line(aes(x=k, y = `%bob`,color='bob'))+
+  geom_point(aes(x=k, y = `%bob`,color='bob'))+
+  ylab("%")+
+  xlab("Centroids (k)")+
+  scale_color_manual(values=c("orange","skyblue"))+
+  theme_minimal()
+  #ggdark::dark_theme_classic()
+```
+```{r fig.height=8, fig.width=14}
+kmeans_data_all <- list()
+for (alpha in p$calculate_ac$alphas) {
+  kmeans_data<-yaml::read_yaml(paste0("metrics/kmeans/asis/kmeans_alpha=",alpha,".yaml"))
+   kmeans_data<-kmeans_data |> as.data.frame()
+  kmeans_data$alpha<-alpha
+  kmeans_data_all<-rbind(kmeans_data_all,kmeans_data)
+  
+}
+kmeans_data_all <- kmeans_data_all %>% mutate(`%hob` = (hob/2874213)*100,`%bob`=(bob/24)*100) 
+kmeans_data_all
+kmeans_data_all %>% 
+  ggplot()+
+  facet_wrap(~alpha,ncol=4)+
+  labs(subtitle="%hob and %bob values for asis dataset.",title="Pkts dataset: Alpha Centrality using different values for alpha")+
+  geom_line(aes(x=k, y = `%hob`,color='hob'))+
+  geom_point(aes(x=k, y = `%hob`,color='hob'))+
+  geom_line(aes(x=k, y = `%bob`,color='bob'))+
+  geom_point(aes(x=k, y = `%bob`,color='bob'))+
+  ylab("%")+
+  xlab("Centroids (k)")+
+  scale_color_manual(values=c("orange","skyblue"))+
+  theme_minimal()
+  #ggdark::dark_theme_classic()
+```

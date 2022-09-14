@@ -59,13 +59,13 @@ calculate_degree <- function (igraph_obj) {
 #'
 #' @examples
 #'
-calculate_ac <- function (igraph_obj) {
+calculate_ac <- function (igraph_obj,alpha = 0.01) {
   start <- Sys.time()
-  message("[R] Calculating ac")
+  message("[R] Calculating ac for alpha = ",alpha )
   ac <-
     list(
       "ac" = unname(igraph::alpha.centrality(igraph_obj,
-                                                    alpha = 0.01,
+                                                    alpha = alpha,
                                                     exo = 1,
                                                     weights = NULL
                                                     ))
@@ -80,8 +80,8 @@ calculate_features <- function(igraph_obj) {
   features_f<-cbind(
         as.data.frame(calculate_lcc(igraph_obj)),
         as.data.frame(calculate_degree(igraph_obj)),
-        as.data.frame(calculate_ac(igraph_obj))
+        #as.data.frame(calculate_ac(igraph_obj))
         )
-  names(features_f) <-c("LCC","ID","OD","IDW","ODW","AC")
+  names(features_f) <-c("LCC","ID","OD","IDW","ODW")
   features_f
 }
