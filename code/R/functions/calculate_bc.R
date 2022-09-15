@@ -26,7 +26,7 @@ calculate_bc <- function (igraph_obj) {
     directed = TRUE,
     weights = E(igraph_obj)$weight,
     #cutoff = 0,
-    normalized = TRUE
+    #normalized = FALSE
   )
   stop <- Sys.time()
   message("[R] Total time elapsed: ",difftime(stop,start,units = "hour"))

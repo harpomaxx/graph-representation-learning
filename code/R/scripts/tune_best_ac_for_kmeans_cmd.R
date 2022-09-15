@@ -77,7 +77,7 @@ if (opt$labeldir %>% is.null() || opt$acdir %>% is.null()){
     names(res)<-c("k","bob","hob")
     metrics_dir<-paste0("metrics/kmeans/",basename(opt$acdir))
     dir.create(metrics_dir, showWarnings = FALSE, recursive = TRUE)
-    res %>% yaml::as.yaml() %>% yaml::write_yaml(paste0(metrics_dir,"/kmeans_alpha=",alpha,".yaml"))
+    res %>% yaml::as.yaml() %>% yaml::write_yaml(paste0(metrics_dir,"/kmeans_alpha_",alpha,".yaml"))
  
  }
   ## write(x = "",paste0("kmeans.",Sys.getpid(),".end"))
