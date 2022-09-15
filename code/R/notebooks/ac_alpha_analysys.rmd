@@ -3,6 +3,12 @@ title: "Analysis of the influence of AC in k-means"
 output: html_notebook
 ---
 
+
+```{r setup, warning=FALSE}
+knitr::opts_knit$set(root.dir = '/home/harpo/Dropbox/ongoing-work/git-repos/graph-representation-learning/')
+```
+
+# Normalized
 ```{r  fig.height=8, fig.width=14}
 p<-yaml::read_yaml("params.yaml")
 kmeans_data_all <- list()
@@ -29,6 +35,9 @@ kmeans_data_all %>%
   scale_color_manual(values=c("orange","skyblue"))+
   theme_minimal()
   #ggdark::dark_theme_classic()
+
+
+kmeans_data_all %>% mutate(alpha=as.factor(alpha)) %>% filter(alpha=="0.01")
 ```
 ```{r fig.height=8, fig.width=14}
 kmeans_data_all <- list()
@@ -54,4 +63,6 @@ kmeans_data_all %>%
   scale_color_manual(values=c("orange","skyblue"))+
   theme_minimal()
   #ggdark::dark_theme_classic()
+
+kmeans_data_all %>% mutate(alpha=as.factor(alpha)) %>% filter(alpha=="0.01")
 ```
