@@ -19,9 +19,10 @@ calculate_lcc <- function (igraph_obj) {
   
   lcc <-
     igraph::transitivity(igraph_obj,
-                         type = "local",
+                         #type = "local",
+                         type = "barrat",
                          isolates = "zero" ,
-                         weights = NULL)
+                         weights = NULL) # use graph's weight field
   stop <- Sys.time()
   message("[R] Total time elapsed: ", difftime(stop, start, units = "hour"))
   lcc
@@ -80,8 +81,8 @@ calculate_features <- function(igraph_obj) {
   features_f<-cbind(
         as.data.frame(calculate_lcc(igraph_obj)),
         as.data.frame(calculate_degree(igraph_obj)),
-        #as.data.frame(calculate_ac(igraph_obj))
+        as.data.frame(calculate_ac(igraph_obj))
         )
-  names(features_f) <-c("LCC","ID","OD","IDW","ODW")
+  names(features_f) <-c("LCC","ID","OD","IDW","ODW","AC")
   features_f
 }

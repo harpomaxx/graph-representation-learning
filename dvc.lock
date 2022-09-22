@@ -79,8 +79,8 @@ stages:
     cmd: bash code/bash/calculate_bc_all.sh -i data/ncol/ -o data/features/bc/
     deps:
     - path: code/R/functions/calculate_bc.R
-      md5: cb09859db7260e8c7a1a5d195498bdfb
-      size: 893
+      md5: 8b2d22d6ba328c27597d4dba9976a48d
+      size: 895
     - path: code/R/scripts/calculate_bc_cmd.R
       md5: 4d351c4bf89c6853455c71bbe25b6546
       size: 1127
@@ -93,15 +93,15 @@ stages:
       nfiles: 26
     outs:
     - path: data/features/bc/
-      md5: 7eb9626110436063d8d580aaa6f45afe.dir
-      size: 52607058
+      md5: a161c6de9151b8c8d86aeb3d86fad58e.dir
+      size: 52517356
       nfiles: 13
   calculate_features:
     cmd: bash code/bash/calculate_features_all.sh -i data/ncol/ -o data/features/all/
     deps:
     - path: code/R/functions/calculate_features.R
-      md5: 4bcd0677c67104cb6d24fd953a427a38
-      size: 2480
+      md5: c6f7a686c25438bc7bee6a54b53e2ce7
+      size: 2554
     - path: code/R/scripts/calculate_features_cmd.R
       md5: 2aef7d6c6c7a11dacbf908e6562044a2
       size: 1194
@@ -114,8 +114,8 @@ stages:
       nfiles: 26
     outs:
     - path: data/features/all/
-      md5: 2c6e96e99d00d57468e46bcf2bbb6b2e.dir
-      size: 92476745
+      md5: 7dfd4f10cfc7e4d9b1959d0290e68612.dir
+      size: 92477814
       nfiles: 13
   merge_features:
     cmd: bash code/bash/merge_features_all.sh -f data/features/all/ -b data/features/bc/
@@ -128,17 +128,17 @@ stages:
       md5: 359b450522c5f25a4d8d875f09060e7f
       size: 1834
     - path: data/features/all/
-      md5: 2c6e96e99d00d57468e46bcf2bbb6b2e.dir
-      size: 92476745
+      md5: 7dfd4f10cfc7e4d9b1959d0290e68612.dir
+      size: 92477814
       nfiles: 13
     - path: data/features/bc/
-      md5: 7eb9626110436063d8d580aaa6f45afe.dir
-      size: 52607058
+      md5: a161c6de9151b8c8d86aeb3d86fad58e.dir
+      size: 52517356
       nfiles: 13
     outs:
     - path: data/features/csv/
-      md5: 6ca9faff6752e11e2120cbc2a52c9010.dir
-      size: 144583466
+      md5: e135dfc0173e3ca9ae24e0da56b1c366.dir
+      size: 144496516
       nfiles: 13
   label_dataset:
     cmd: bash code/bash/label_dataset_all.sh -i data/features/csv/ -l rawdata/labels/
@@ -154,8 +154,8 @@ stages:
       md5: cd5ec3f348c9e202f154e0454ac82bda
       size: 1826
     - path: data/features/csv/
-      md5: 6ca9faff6752e11e2120cbc2a52c9010.dir
-      size: 144583466
+      md5: e135dfc0173e3ca9ae24e0da56b1c366.dir
+      size: 144496516
       nfiles: 13
     - path: rawdata/labels/
       md5: 39eb70e73e2d332eec5b6df32ac6350e.dir
@@ -163,8 +163,8 @@ stages:
       nfiles: 13
     outs:
     - path: data/labeled/
-      md5: d98f89715842f888d6342ca69fd8bab1.dir
-      size: 180223195
+      md5: 01e218a8fc9cff6c7423d1d172340f5a.dir
+      size: 180136305
       nfiles: 13
   normalize_features:
     cmd: bash code/bash/normalize_features_all.sh -n data/ncol/ -f data/features/csv/
@@ -180,8 +180,8 @@ stages:
       md5: 9e72aef5f378f1ea67f1d87259fd5e12
       size: 1713
     - path: data/features/csv/
-      md5: 6ca9faff6752e11e2120cbc2a52c9010.dir
-      size: 144583466
+      md5: e135dfc0173e3ca9ae24e0da56b1c366.dir
+      size: 144496516
       nfiles: 13
     - path: data/ncol/
       md5: 3f89066fbcf448b23b36e5fa1f8ffa9b.dir
@@ -189,8 +189,8 @@ stages:
       nfiles: 26
     outs:
     - path: data/features/norm/
-      md5: 6bf9dbd1ee25de64862322470046eb10.dir
-      size: 384418561
+      md5: 48715b1a4c2c7c91b15692d4b79b9588.dir
+      size: 384416017
       nfiles: 13
   label_dataset_normalized:
     cmd: bash code/bash/label_dataset_all.sh -i data/features/norm/ -l rawdata/labels/
@@ -206,8 +206,8 @@ stages:
       md5: cd5ec3f348c9e202f154e0454ac82bda
       size: 1826
     - path: data/features/norm/
-      md5: 6bf9dbd1ee25de64862322470046eb10.dir
-      size: 384418561
+      md5: 48715b1a4c2c7c91b15692d4b79b9588.dir
+      size: 384416017
       nfiles: 13
     - path: rawdata/labels/
       md5: 39eb70e73e2d332eec5b6df32ac6350e.dir
@@ -215,8 +215,8 @@ stages:
       nfiles: 13
     outs:
     - path: data/labelednorm/
-      md5: c620adcc1d2fbff2946aa5f7297372c6.dir
-      size: 419066111
+      md5: 4c530c88126f82f3f501a190e20254e1.dir
+      size: 419063317
       nfiles: 13
   generate_ac:
     cmd: bash code/bash/generate_ac_all.sh  -i data/ncol/ -o data/features/ac/
@@ -234,6 +234,8 @@ stages:
     params:
       params.yaml:
         calculate_ac.alphas:
+        - -0.1
+        - -0.01
         - 0.001
         - 0.01
         - 0.05
@@ -244,28 +246,30 @@ stages:
         - 0.8
     outs:
     - path: data/features/ac/asis/
-      md5: 4ce1d6dc83d7f3077ea2a5846ef7a3e4.dir
-      size: 833907565
-      nfiles: 104
+      md5: 8f92ec69eadade1f13fedc1d6a914b7a.dir
+      size: 1042488450
+      nfiles: 130
     - path: data/features/ac/normalized/
-      md5: 0ac1c41e7ef22e8a1cfb69ab416cd56c.dir
-      size: 864737923
-      nfiles: 104
+      md5: 3ba53209b9c1b7e9a6d0b0208cfddc5b.dir
+      size: 1075012144
+      nfiles: 130
   tune_best_ac_for_kmeans:
     cmd: Rscript code/R/scripts/tune_best_ac_for_kmeans_cmd.R --labeldir data/labelednorm/
       --acdir data/features/ac/normalized/
     deps:
     - path: data/features/ac/
-      md5: 41fab7adc6aae99958d204137cd7be4d.dir
-      size: 1698645488
-      nfiles: 208
+      md5: 76d03fd27c9775aeafe1da6b65742c14.dir
+      size: 2117500594
+      nfiles: 260
     - path: data/labelednorm/
-      md5: c620adcc1d2fbff2946aa5f7297372c6.dir
-      size: 419066111
+      md5: 4c530c88126f82f3f501a190e20254e1.dir
+      size: 419063317
       nfiles: 13
     params:
       params.yaml:
         calculate_ac.alphas:
+        - -0.1
+        - -0.01
         - 0.001
         - 0.01
         - 0.05
@@ -291,24 +295,26 @@ stages:
         - 225
     outs:
     - path: metrics/kmeans/normalized
-      md5: 95828d966b22af072cd356622d33b99d.dir
-      size: 3069
-      nfiles: 8
+      md5: 27a1e926913016e9a921811109e3b046.dir
+      size: 3840
+      nfiles: 10
   tune_best_ac_for_kmeans_asis:
     cmd: Rscript code/R/scripts/tune_best_ac_for_kmeans_cmd.R --labeldir data/labeled/
       --acdir data/features/ac/asis/
     deps:
     - path: data/features/ac/
-      md5: 41fab7adc6aae99958d204137cd7be4d.dir
-      size: 1698645488
-      nfiles: 208
+      md5: 76d03fd27c9775aeafe1da6b65742c14.dir
+      size: 2117500594
+      nfiles: 260
     - path: data/labeled/
-      md5: d98f89715842f888d6342ca69fd8bab1.dir
-      size: 180223195
+      md5: 01e218a8fc9cff6c7423d1d172340f5a.dir
+      size: 180136305
       nfiles: 13
     params:
       params.yaml:
         calculate_ac.alphas:
+        - -0.1
+        - -0.01
         - 0.001
         - 0.01
         - 0.05
@@ -334,6 +340,6 @@ stages:
         - 225
     outs:
     - path: metrics/kmeans/asis
-      md5: a30dfd1da158bc8fd7e8d24beec0f0d1.dir
-      size: 2925
-      nfiles: 8
+      md5: 73357043cc4c6e6a4f58612020cd3de8.dir
+      size: 3642
+      nfiles: 10
