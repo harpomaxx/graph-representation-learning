@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from optparse import OptionParser
 import sys
+import networkx as nx
 
 def parsearg():
     parser = OptionParser(usage="usage: %prog [opt] ",
@@ -47,7 +48,6 @@ def normalize(graph,feature):
     return feature_norm
 
 
-
 if __name__ == '__main__':
    opt = parsearg()
    if opt.input == None:
@@ -56,11 +56,13 @@ if __name__ == '__main__':
 
    else:   
         #Importing the graph:
-        g=gt.Graph()
+        g=gt.Graph()   #graph-tool
+        g_nx=nx.DiGraph()   #networkX.
         #ctuName="capture20110815-2.binetflow.labels.gz"
         ctuName=opt.input
         print("capture:"+ctuName)
         g= gt.load_graph("./data/graphml/"+ctuName+".graphml")
+        g_nx=nx.read_graphml("./data/graphml/"+ctuName+".graphml")
         print("[Py] Input graphml file read correctly")
 
         #FEATURES CALCULATION AND NORMALIZATION
@@ -82,26 +84,34 @@ if __name__ == '__main__':
         IDW_norm=normalize(g,IDW)
         IDW_df=pd.DataFrame(IDW)
         IDW_norm_df=pd.DataFrame(IDW_norm)
+
         #Get out degree with weight
         ODW=g.degree_property_map("out",weight=Bytes)
         ODW_norm=normalize(g,ODW)
         ODW_df=pd.DataFrame(ODW)
         ODW_norm_df=pd.DataFrame(ODW_norm)
+
+        #Alpha centrality (with networkX)
+        # AC=nx.katz_centrality_numpy(g_nx, alpha=0.001, beta=1.0, normalized=False, weight=None)
+        # AC_norm=normalize(g_nx,AC)
+        AC=gt.katz(g,weight=None,norm=False,alpha=0.001)
+        AC_norm=normalize(g,AC)
+        
+        AC_df=pd.DataFrame(AC)
+        AC_norm_df=pd.DataFrame(AC_norm)
+
         #Betweenness centrality
-        BV, _ = gt.betweenness(g,weight=Bytes,norm=True)
+        BV, _ = gt.betweenness(g,weight=Bytes,norm=False)
         BV_norm=normalize(g,BV)
         BC_df=pd.DataFrame(BV)
         BC_norm_df=pd.DataFrame(BV_norm)
+
         #Local clustering coefficient
         LCC=gt.local_clustering(g,weight=None)
         LCC_norm=normalize(g,LCC)
         LCC_df=pd.DataFrame(LCC)
         LCC_norm_df=pd.DataFrame(LCC_norm)
-        #Alpha centrality
-        AC=gt.katz(g,weight=None,norm=False,alpha=0.003)
-        AC_norm=normalize(g,AC)
-        AC_df=pd.DataFrame(AC)
-        AC_norm_df=pd.DataFrame(AC_norm)
+        
 
 
         #Get node names
