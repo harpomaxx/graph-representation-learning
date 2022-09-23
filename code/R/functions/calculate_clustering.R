@@ -16,7 +16,7 @@ calculate_cluster_kmeans <- function (features_data,labels_data,nodes_data,k) {
   start <- Sys.time()
   message("[R] Calculating kmeans for k=", k)
   
-  cluster_data <- kmeans(features_data, centers = k,nstart = 10, iter.max = 1000)
+  cluster_data <- kmeans(features_data, centers = k,nstart = 10, iter.max = 10000)
   features_cluster<-data.frame(node=nodes_data,features_data,label=labels_data,cluster=cluster_data$cluster)
   
   clusters_size <- features_cluster %>% group_by(cluster) %>% count()

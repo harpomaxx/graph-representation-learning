@@ -257,6 +257,12 @@ stages:
     cmd: Rscript code/R/scripts/tune_best_ac_for_kmeans_cmd.R --labeldir data/labelednorm/
       --acdir data/features/ac/normalized/
     deps:
+    - path: code/R/functions/calculate_clustering.R
+      md5: fbc13f5e4d30d7e1df4bbf693871fa98
+      size: 1569
+    - path: code/R/scripts/tune_best_ac_for_kmeans_cmd.R
+      md5: 94651096a82844b67f76a06e1c7ffd2b
+      size: 3530
     - path: data/features/ac/
       md5: 76d03fd27c9775aeafe1da6b65742c14.dir
       size: 2117500594
@@ -295,13 +301,19 @@ stages:
         - 225
     outs:
     - path: metrics/kmeans/normalized
-      md5: 27a1e926913016e9a921811109e3b046.dir
-      size: 3840
+      md5: 83dc5cc255c486d572670a846b9c4746.dir
+      size: 2927
       nfiles: 10
   tune_best_ac_for_kmeans_asis:
     cmd: Rscript code/R/scripts/tune_best_ac_for_kmeans_cmd.R --labeldir data/labeled/
       --acdir data/features/ac/asis/
     deps:
+    - path: code/R/functions/calculate_clustering.R
+      md5: fbc13f5e4d30d7e1df4bbf693871fa98
+      size: 1569
+    - path: code/R/scripts/tune_best_ac_for_kmeans_cmd.R
+      md5: 94651096a82844b67f76a06e1c7ffd2b
+      size: 3530
     - path: data/features/ac/
       md5: 76d03fd27c9775aeafe1da6b65742c14.dir
       size: 2117500594
@@ -340,6 +352,6 @@ stages:
         - 225
     outs:
     - path: metrics/kmeans/asis
-      md5: 73357043cc4c6e6a4f58612020cd3de8.dir
-      size: 3642
+      md5: 0171b5dbe960ee9200586b775f2e692f.dir
+      size: 2733
       nfiles: 10

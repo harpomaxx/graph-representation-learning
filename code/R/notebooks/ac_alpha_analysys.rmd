@@ -7,6 +7,10 @@ output: html_notebook
 ```{r setup, warning=FALSE}
 knitr::opts_knit$set(root.dir = '/home/harpo/Dropbox/ongoing-work/git-repos/graph-representation-learning/')
 ```
+```{r}
+library(dplyr)
+library(ggplot2)
+```
 
 # Normalized
 ```{r  fig.height=8, fig.width=14}
@@ -14,7 +18,7 @@ p<-yaml::read_yaml("params.yaml")
 kmeans_data_all <- list()
 
 for (alpha in p$calculate_ac$alphas) {
-  kmeans_data<-yaml::read_yaml(paste0("metrics/kmeans/normalized/kmeans_alpha=",alpha,".yaml"))
+  kmeans_data<-yaml::read_yaml(paste0("metrics/kmeans/normalized/kmeans_alpha_",alpha,".yaml"))
    kmeans_data<-kmeans_data |> as.data.frame()
   kmeans_data$alpha<-alpha
   kmeans_data_all<-rbind(kmeans_data_all,kmeans_data)
@@ -39,10 +43,10 @@ kmeans_data_all %>%
 
 kmeans_data_all %>% mutate(alpha=as.factor(alpha)) %>% filter(alpha=="0.01")
 ```
-```{r fig.height=8, fig.width=14}
+```{r fig.height=8, fig.width=14 }
 kmeans_data_all <- list()
 for (alpha in p$calculate_ac$alphas) {
-  kmeans_data<-yaml::read_yaml(paste0("metrics/kmeans/asis/kmeans_alpha=",alpha,".yaml"))
+  kmeans_data<-yaml::read_yaml(paste0("metrics/kmeans/asis/kmeans_alpha_",alpha,"_r_.yaml"))
    kmeans_data<-kmeans_data |> as.data.frame()
   kmeans_data$alpha<-alpha
   kmeans_data_all<-rbind(kmeans_data_all,kmeans_data)
@@ -64,5 +68,5 @@ kmeans_data_all %>%
   theme_minimal()
   #ggdark::dark_theme_classic()
 
-kmeans_data_all %>% mutate(alpha=as.factor(alpha)) %>% filter(alpha=="0.01")
+kmeans_data_all %>% mutate(alpha=as.factor(alpha)) %>% filter(alpha=="0.01") %>% knitr::render_markdown()
 ```

@@ -69,8 +69,8 @@ features_norm_data
 # Select Features
 ```{r}
 #selected_features <- c("ID","OD","IDW","ODW","BC")
-selected_features <- c("ID","OD","IDW","ODW","BC")
-selected_features <- c("AC")
+selected_features <- c("ID","OD","IDW","ODW","BC","AC")
+#selected_features <- c("AC")
 ```
 
 ```{r}
@@ -106,7 +106,7 @@ features_norm_data %>% select(any_of(selected_features),"label" ) %>% reshape2::
 
 # Clustering
 ```{r}
-cluster_data <- kmeans(features_norm_data %>% select(any_of(selected_features)),centers = 50,nstart = 10, iter.max = 1000)
+cluster_data <- kmeans(features_data %>% select(any_of(selected_features)),centers = 81,nstart = 10, iter.max = 10000)
 features_norm_cluster<-data.frame(features_norm_data,cluster=cluster_data$cluster)
 gc()
 ```

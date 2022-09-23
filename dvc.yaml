@@ -152,6 +152,8 @@ stages:
     deps:
      - ${features.acdir}
      - ${dataset.normdir}
+     - code/R/scripts/tune_best_ac_for_kmeans_cmd.R
+     - code/R/functions/calculate_clustering.R
     params:
      - tune_best_ac_for_kmeans.centroids
      - calculate_ac.alphas
@@ -164,6 +166,9 @@ stages:
     deps:
      - ${features.acdir}
      - ${dataset.dir}
+     - code/R/scripts/tune_best_ac_for_kmeans_cmd.R
+     - code/R/functions/calculate_clustering.R
+     
     params:
      - tune_best_ac_for_kmeans.centroids
      - calculate_ac.alphas
