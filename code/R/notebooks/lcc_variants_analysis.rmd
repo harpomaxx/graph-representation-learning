@@ -1,0 +1,61 @@
+---
+title: "LCC variants"
+output: html_notebook
+---
+
+```{r}
+tati_data<-readr::read_csv("./all_captures_except_9_SINnormalizar_pkts.csv")
+harpo_data2<-readr::read_csv("./all_but_capture9-lcc-non-directed.csv")
+harpo_data<-readr::read_csv("./all_but_capture9.csv")
+
+tati_data %>% nrow()
+harpo_data %>% filter(label=="infected")
+```
+
+```{r}
+lcc_data<-cbind(harpo=harpo_data$LCC,tati=tati_data$LCC)
+lcc_data %>% reshape2::melt() %>%
+  ggplot()+
+  geom_boxplot(aes(x=Var2,y=value,fill=Var2))+
+  theme_classic()
+```
+```{r}
+library(ggplot2)
+library(ggridges)
+lcc_data<-cbind(harpo_LCCv1=harpo_data$LCC,harpo_LCCv2=harpo_data2$LCC,tati_LCCv1=tati_data$LCC)
+lcc_data %>% reshape2::melt() %>% filter(value>0)%>%
+  ggplot(aes(y=Var2,x=value,fill=Var2))+
+  geom_density_ridges(scale = 4,,alpha=0.2) + 
+  scale_y_discrete(expand = c(0, 0)) +     # will generally have to set the `expand` option
+  scale_x_continuous(expand = c(0, 0)) +   # for both axes to remove unneeded padding
+  coord_cartesian(clip = "off") + # to avoid clipping of the very top of the top ridgeline
+  theme_ridges()
+```
+
+```{r}
+source("code/R/functions/label_dataset.R")
+dataset_not_labeled <- readr::read_csv("data/features/csv/capture20110816.binetflow.labels-positive-weights.csv")
+labels <- readr::read_csv("rawdata/labels/capture20110816.nodes.labels",col_names = FALSE)
+
+nodes_infected <-
+    labels %>% dplyr::filter(X3 == "infected") %>%
+    select(X1) %>% unname() %>% unlist()
+  print(nodes_infected)
+nodes_normal <-
+    labels %>% dplyr::filter(X3 == "normal") %>%
+    select(X1) %>% unname() %>% unlist()
+
+dataset_not_labeled$label <- "background"
+  dataset_labeled <-
+    dataset_not_labeled %>% 
+    mutate(label = if(node %in% nodes_infected "infected","background"))
+
+
+
+
+
+#dataset_labeled<-label_dataset(dataset_not_labeled,labels = labels)
+
+dataset_labeled %>% group_by(label) %>% count()
+```
+

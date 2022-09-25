@@ -41,7 +41,7 @@ features_data<-rbind(
   readr::read_csv("data/labeled/capture20110818-2.binetflow.labels-positive-weights.labeled.csv"),
   readr::read_csv("data/labeled/capture20110819.binetflow.labels-positive-weights.labeled.csv")
 )
-features_data
+#features_data %>% readr::write_csv("./all_but_capture9-lcc-non-directed.csv")
 
 
 ```
@@ -65,11 +65,15 @@ features_norm_data<-rbind(
 features_norm_data
 
 ```
+```{r}
+features_data <- readr::read_csv("all_captures_except_9_SINnormalizar_pkts.csv")
+features_data %>% group_by(label) %>% count()
+```
 
 # Select Features
 ```{r}
 #selected_features <- c("ID","OD","IDW","ODW","BC")
-selected_features <- c("ID","OD","IDW","ODW","BC","AC")
+selected_features <- c("ID","OD","IDW","ODW","BC","AC","LCC")
 #selected_features <- c("AC")
 ```
 
@@ -106,16 +110,29 @@ features_norm_data %>% select(any_of(selected_features),"label" ) %>% reshape2::
 
 # Clustering
 ```{r}
-cluster_data <- kmeans(features_data %>% select(any_of(selected_features)),centers = 81,nstart = 10, iter.max = 10000)
-features_norm_cluster<-data.frame(features_norm_data,cluster=cluster_data$cluster)
+cluster_data <- kmeans(features_data %>% select(any_of(selected_features)),centers = 25,nstart = 10, iter.max = 10000)
+features_cluster<-data.frame(features_data,cluster=cluster_data$cluster)
 gc()
 ```
 
 ```{r}
-clusters_size <- features_norm_cluster %>% group_by(cluster) %>% count()
+clusters_size <- features_cluster %>% group_by(cluster) %>% count()
 clusters_size %>% arrange(desc(n))
 begnin_cluster<-clusters_size  %>% arrange(desc(n)) %>% head(1) %>% select(cluster) %>% unlist() %>% unname()
-features_norm_cluster %>% filter(cluster == begnin_cluster) %>% group_by(label) %>% count()
+features_cluster %>% filter(cluster == begnin_cluster) %>% group_by(label) %>% count()
+```
+```{r}
+clusters_size <- features_cluster %>% group_by(cluster) %>% count()
+begnin_cluster<-clusters_size  %>% arrange(desc(n)) %>% head(1) %>% select(cluster) %>% unlist() %>% unname()
+tot_bot<-features_cluster %>% filter(label== "infected") %>% nrow()
+tot_host<-features_cluster %>% filter(label!= "infected") %>% nrow
+clust_bot<-features_cluster %>% filter(cluster == begnin_cluster) %>% filter(label=="infected") %>% nrow()
+clust_host<-features_cluster %>% filter(cluster == begnin_cluster) %>% filter(label!="infected") %>% nrow()
+bob <- tot_bot - clust_bot
+hob <- tot_host - clust_host
+
+print(c(bob,hob))
+features_data %>% group_by(label) %>% count()
 ```
 
 ## PCA
