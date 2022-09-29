@@ -15,7 +15,7 @@ suppressPackageStartupMessages(library(tibble))
 calculate_lcc <- function (igraph_obj) {
   start <- Sys.time()
   message("[R] Calculating LCC")
-  igraph_obj <- igraph::as.undirected(igraph_obj, mode = "collapse")
+ # igraph_obj <- igraph::as.undirected(igraph_obj, mode = "collapse")
   
   lcc <-
     igraph::transitivity(igraph_obj,

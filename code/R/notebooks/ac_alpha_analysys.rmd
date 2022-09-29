@@ -42,17 +42,18 @@ kmeans_data_all %>%
 
 
 kmeans_data_all %>% mutate(alpha=as.factor(alpha)) %>% filter(alpha=="0.01")
+ggsave("images/kmeans/normalized/ac_alpha_tune.png",units='in',width = 14,height = 8)
 ```
 ```{r fig.height=8, fig.width=14 }
 kmeans_data_all <- list()
 for (alpha in p$calculate_ac$alphas) {
-  kmeans_data<-yaml::read_yaml(paste0("metrics/kmeans/asis/kmeans_alpha_",alpha,"_r_.yaml"))
+  kmeans_data<-yaml::read_yaml(paste0("metrics/kmeans/asis/kmeans_alpha_",alpha,".yaml"))
    kmeans_data<-kmeans_data |> as.data.frame()
   kmeans_data$alpha<-alpha
   kmeans_data_all<-rbind(kmeans_data_all,kmeans_data)
   
 }
-kmeans_data_all <- kmeans_data_all %>% mutate(`%hob` = (hob/2874213)*100,`%bob`=(bob/24)*100) 
+kmeans_data_all <- kmeans_data_all %>% mutate(`%hob` = (hob/2874213)*100,`%bob`=(bob/25)*100) 
 kmeans_data_all
 kmeans_data_all %>% 
   ggplot()+
@@ -64,9 +65,13 @@ kmeans_data_all %>%
   geom_point(aes(x=k, y = `%bob`,color='bob'))+
   ylab("%")+
   xlab("Centroids (k)")+
+  #ylim(0,5)+
   scale_color_manual(values=c("orange","skyblue"))+
   theme_minimal()
   #ggdark::dark_theme_classic()
 
-kmeans_data_all %>% mutate(alpha=as.factor(alpha)) %>% filter(alpha=="0.01") %>% knitr::render_markdown()
+kmeans_data_all %>% mutate(alpha=as.factor(alpha)) %>% filter(alpha=="0.01") #%>% knitr::kable(format="markdown")
+
+kmeans_data_all %>% mutate(alpha=as.factor(alpha)) %>% filter(hob<10000) %>% arrange(desc(bob))
+ggsave("images/kmeans/asis/ac_alpha_tune.png",units='in',width = 14,height = 8)
 ```

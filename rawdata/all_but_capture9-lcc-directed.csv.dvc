@@ -1,0 +1,4 @@
+outs:
+- md5: 961a207732b5ca58a98450354e1b0299
+  size: 159793853
+  path: all_but_capture9-lcc-directed.csv

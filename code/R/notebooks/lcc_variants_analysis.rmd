@@ -3,10 +3,14 @@ title: "LCC variants"
 output: html_notebook
 ---
 
+
+```{r setup, warning=FALSE}
+knitr::opts_knit$set(root.dir = '/home/harpo/Dropbox/ongoing-work/git-repos/graph-representation-learning/')
+```
 ```{r}
-tati_data<-readr::read_csv("./all_captures_except_9_SINnormalizar_pkts.csv")
-harpo_data2<-readr::read_csv("./all_but_capture9-lcc-non-directed.csv")
-harpo_data<-readr::read_csv("./all_but_capture9.csv")
+tati_data<-readr::read_csv("rawdata/all_captures_except_9_SINnormalizar_pkts.csv")
+harpo_data2<-readr::read_csv("rawdata/all_but_capture9-lcc-non-directed.csv")
+harpo_data<-readr::read_csv("rawdata/all_but_capture9-lcc-directed.csv")
 
 tati_data %>% nrow()
 harpo_data %>% filter(label=="infected")
