@@ -100,8 +100,8 @@ stages:
     cmd: bash code/bash/calculate_features_all.sh -i data/ncol/ -o data/features/all/
     deps:
     - path: code/R/functions/calculate_features.R
-      md5: 519523a83dc2824b288703112b12b18d
-      size: 2555
+      md5: c6f7a686c25438bc7bee6a54b53e2ce7
+      size: 2554
     - path: code/R/scripts/calculate_features_cmd.R
       md5: 2aef7d6c6c7a11dacbf908e6562044a2
       size: 1194
@@ -114,8 +114,8 @@ stages:
       nfiles: 26
     outs:
     - path: data/features/all/
-      md5: f87ccf4627a8ad08f9f3d1621bbc6ef3.dir
-      size: 92482412
+      md5: 7dfd4f10cfc7e4d9b1959d0290e68612.dir
+      size: 92477814
       nfiles: 13
   merge_features:
     cmd: bash code/bash/merge_features_all.sh -f data/features/all/ -b data/features/bc/
@@ -128,8 +128,8 @@ stages:
       md5: 359b450522c5f25a4d8d875f09060e7f
       size: 1834
     - path: data/features/all/
-      md5: f87ccf4627a8ad08f9f3d1621bbc6ef3.dir
-      size: 92482412
+      md5: 7dfd4f10cfc7e4d9b1959d0290e68612.dir
+      size: 92477814
       nfiles: 13
     - path: data/features/bc/
       md5: a161c6de9151b8c8d86aeb3d86fad58e.dir
@@ -137,25 +137,25 @@ stages:
       nfiles: 13
     outs:
     - path: data/features/csv/
-      md5: 647860d270aa9ae593ff9d6b8cbf69c0.dir
-      size: 144501048
+      md5: e135dfc0173e3ca9ae24e0da56b1c366.dir
+      size: 144496516
       nfiles: 13
   label_dataset:
     cmd: bash code/bash/label_dataset_all.sh -i data/features/csv/ -l rawdata/labels/
       -o data/labeled/
     deps:
     - path: code/R/functions/label_dataset.R
-      md5: 0fbfcf9a4a43827c013cd03ace761392
-      size: 874
+      md5: 22122250508906df1af49f847f82197c
+      size: 875
     - path: code/R/scripts/label_dataset_cmd.R
       md5: 05527c9f4b7372dc479ad83f67e74c25
       size: 1471
     - path: code/bash/label_dataset_all.sh
-      md5: 8ae13af9fb76ef9477f1d811cc64c5c7
-      size: 1825
+      md5: cd5ec3f348c9e202f154e0454ac82bda
+      size: 1826
     - path: data/features/csv/
-      md5: 647860d270aa9ae593ff9d6b8cbf69c0.dir
-      size: 144501048
+      md5: e135dfc0173e3ca9ae24e0da56b1c366.dir
+      size: 144496516
       nfiles: 13
     - path: rawdata/labels/
       md5: fabe1ef646b63850446448a1bd83fc92.dir
@@ -163,8 +163,8 @@ stages:
       nfiles: 13
     outs:
     - path: data/labeled/
-      md5: a9105747191ce4c73267f0bee43ce907.dir
-      size: 180140821
+      md5: 94dc0a1c4b91ca4c641aa7aa9c486f93.dir
+      size: 180136293
       nfiles: 13
   normalize_features:
     cmd: bash code/bash/normalize_features_all.sh -n data/ncol/ -f data/features/csv/
@@ -180,8 +180,8 @@ stages:
       md5: 9e72aef5f378f1ea67f1d87259fd5e12
       size: 1713
     - path: data/features/csv/
-      md5: 647860d270aa9ae593ff9d6b8cbf69c0.dir
-      size: 144501048
+      md5: e135dfc0173e3ca9ae24e0da56b1c366.dir
+      size: 144496516
       nfiles: 13
     - path: data/ncol/
       md5: 3f89066fbcf448b23b36e5fa1f8ffa9b.dir
@@ -189,8 +189,8 @@ stages:
       nfiles: 26
     outs:
     - path: data/features/norm/
-      md5: 71da33f647cb5fa2db68645a6e571ca5.dir
-      size: 384416290
+      md5: 48715b1a4c2c7c91b15692d4b79b9588.dir
+      size: 384416017
       nfiles: 13
   label_dataset_normalized:
     cmd: bash code/bash/label_dataset_all.sh -i data/features/norm/ -l rawdata/labels/
@@ -206,8 +206,8 @@ stages:
       md5: cd5ec3f348c9e202f154e0454ac82bda
       size: 1826
     - path: data/features/norm/
-      md5: 71da33f647cb5fa2db68645a6e571ca5.dir
-      size: 384416290
+      md5: 48715b1a4c2c7c91b15692d4b79b9588.dir
+      size: 384416017
       nfiles: 13
     - path: rawdata/labels/
       md5: fabe1ef646b63850446448a1bd83fc92.dir
@@ -215,8 +215,8 @@ stages:
       nfiles: 13
     outs:
     - path: data/labelednorm/
-      md5: cf97d7f85e6ad0ff4fb7a8ee00886b1c.dir
-      size: 419063530
+      md5: 2b37a6fb8f067b54a2997714090f6092.dir
+      size: 419063305
       nfiles: 13
   generate_ac:
     cmd: bash code/bash/generate_ac_all.sh  -i data/ncol/ -o data/features/ac/
@@ -268,8 +268,8 @@ stages:
       size: 2117500594
       nfiles: 260
     - path: data/labelednorm/
-      md5: cf97d7f85e6ad0ff4fb7a8ee00886b1c.dir
-      size: 419063530
+      md5: 2b37a6fb8f067b54a2997714090f6092.dir
+      size: 419063305
       nfiles: 13
     params:
       params.yaml:
@@ -301,8 +301,8 @@ stages:
         - 225
     outs:
     - path: metrics/kmeans/normalized
-      md5: bbe8b9365a90dbf4f65143503fa4e7eb.dir
-      size: 2928
+      md5: 26cf3bb7f919b97caee2f6d66e16af04.dir
+      size: 2924
       nfiles: 10
   tune_best_ac_for_kmeans_asis:
     cmd: Rscript code/R/scripts/tune_best_ac_for_kmeans_cmd.R --labeldir data/labeled/
@@ -319,8 +319,8 @@ stages:
       size: 2117500594
       nfiles: 260
     - path: data/labeled/
-      md5: a9105747191ce4c73267f0bee43ce907.dir
-      size: 180140821
+      md5: 94dc0a1c4b91ca4c641aa7aa9c486f93.dir
+      size: 180136293
       nfiles: 13
     params:
       params.yaml:
@@ -352,6 +352,6 @@ stages:
         - 225
     outs:
     - path: metrics/kmeans/asis
-      md5: 0c3dfebb0c344fde94382ef7410ac2bd.dir
-      size: 2742
+      md5: 1951d9b6744bcf26a32637efee5c2a56.dir
+      size: 2739
       nfiles: 10
