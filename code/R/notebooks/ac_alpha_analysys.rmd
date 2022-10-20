@@ -7,12 +7,14 @@ output: html_notebook
 ```{r setup, warning=FALSE}
 knitr::opts_knit$set(root.dir = '/home/harpo/Dropbox/ongoing-work/git-repos/graph-representation-learning/')
 ```
+
 ```{r}
 library(dplyr)
 library(ggplot2)
 ```
 
 # Normalized
+
 ```{r  fig.height=8, fig.width=14}
 p<-yaml::read_yaml("params.yaml")
 kmeans_data_all <- list()
@@ -70,8 +72,8 @@ kmeans_data_all %>%
   theme_minimal()
   #ggdark::dark_theme_classic()
 
-kmeans_data_all %>% mutate(alpha=as.factor(alpha)) %>% filter(alpha=="0.01") #%>% knitr::kable(format="markdown")
+kmeans_data_all %>% mutate(alpha=as.factor(alpha)) %>% filter(alpha=="-0.01") #%>% knitr::kable(format="markdown")
 
-kmeans_data_all %>% mutate(alpha=as.factor(alpha)) %>% filter(hob<10000) %>% arrange(desc(bob))
+kmeans_data_all %>% mutate(alpha=as.factor(alpha)) %>% filter(hob<17000) %>% arrange(desc(bob))
 ggsave("images/kmeans/asis/ac_alpha_tune.png",units='in',width = 14,height = 8)
 ```
