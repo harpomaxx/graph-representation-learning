@@ -1,0 +1,79 @@
+---
+title: "Analysis of the influence of AC in k-means"
+output: html_notebook
+---
+
+
+```{r setup, warning=FALSE}
+knitr::opts_knit$set(root.dir = '/home/harpo/Dropbox/ongoing-work/git-repos/graph-representation-learning/')
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+```
+
+# Normalized
+
+```{r  fig.height=8, fig.width=14}
+p<-yaml::read_yaml("params.yaml")
+kmeans_data_all <- list()
+
+for (alpha in p$calculate_ac$alphas) {
+  kmeans_data<-yaml::read_yaml(paste0("metrics/kmeans/normalized/kmeans_alpha_",alpha,".yaml"))
+   kmeans_data<-kmeans_data |> as.data.frame()
+  kmeans_data$alpha<-alpha
+  kmeans_data_all<-rbind(kmeans_data_all,kmeans_data)
+  
+}
+kmeans_data_all <- kmeans_data_all %>% mutate(`%hob` = (hob/2874213)*100,`%bob`=(bob/24)*100) 
+kmeans_data_all
+kmeans_data_all %>% 
+  ggplot()+
+  facet_wrap(~alpha,ncol=4)+
+  labs(subtitle="%hob and %bob values for normalized dataset.",title="Pkts dataset: Alpha Centrality using different values for alpha")+
+  geom_line(aes(x=k, y = `%hob`,color='hob'))+
+  geom_point(aes(x=k, y = `%hob`,color='hob'))+
+  geom_line(aes(x=k, y = `%bob`,color='bob'))+
+  geom_point(aes(x=k, y = `%bob`,color='bob'))+
+  ylab("%")+
+  xlab("Centroids (k)")+
+  scale_color_manual(values=c("orange","skyblue"))+
+  theme_minimal()
+  #ggdark::dark_theme_classic()
+
+
+kmeans_data_all %>% mutate(alpha=as.factor(alpha)) %>% filter(alpha=="0.01")
+ggsave("images/kmeans/normalized/ac_alpha_tune.png",units='in',width = 14,height = 8)
+```
+```{r fig.height=8, fig.width=14 }
+kmeans_data_all <- list()
+for (alpha in p$calculate_ac$alphas) {
+  kmeans_data<-yaml::read_yaml(paste0("metrics/kmeans/asis/kmeans_alpha_",alpha,".yaml"))
+   kmeans_data<-kmeans_data |> as.data.frame()
+  kmeans_data$alpha<-alpha
+  kmeans_data_all<-rbind(kmeans_data_all,kmeans_data)
+  
+}
+kmeans_data_all <- kmeans_data_all %>% mutate(`%hob` = (hob/2874213)*100,`%bob`=(bob/25)*100) 
+kmeans_data_all
+kmeans_data_all %>% 
+  ggplot()+
+  facet_wrap(~alpha,ncol=4)+
+  labs(subtitle="%hob and %bob values for asis dataset.",title="Pkts dataset: Alpha Centrality using different values for alpha")+
+  geom_line(aes(x=k, y = `%hob`,color='hob'))+
+  geom_point(aes(x=k, y = `%hob`,color='hob'))+
+  geom_line(aes(x=k, y = `%bob`,color='bob'))+
+  geom_point(aes(x=k, y = `%bob`,color='bob'))+
+  ylab("%")+
+  xlab("Centroids (k)")+
+  #ylim(0,5)+
+  scale_color_manual(values=c("orange","skyblue"))+
+  theme_minimal()
+  #ggdark::dark_theme_classic()
+
+kmeans_data_all %>% mutate(alpha=as.factor(alpha)) %>% filter(alpha=="-0.01") #%>% knitr::kable(format="markdown")
+
+kmeans_data_all %>% mutate(alpha=as.factor(alpha)) %>% filter(hob<17000) %>% arrange(desc(bob))
+ggsave("images/kmeans/asis/ac_alpha_tune.png",units='in',width = 14,height = 8)
+```

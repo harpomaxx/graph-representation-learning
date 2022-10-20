@@ -19,9 +19,10 @@ calculate_lcc <- function (igraph_obj) {
   
   lcc <-
     igraph::transitivity(igraph_obj,
-                         type = "local",
+                         #type = "local",
+                         type = "barrat",
                          isolates = "zero" ,
-                         weights = NULL)
+                         weights = NULL) # use graph's weight field
   stop <- Sys.time()
   message("[R] Total time elapsed: ", difftime(stop, start, units = "hour"))
   lcc
@@ -59,13 +60,13 @@ calculate_degree <- function (igraph_obj) {
 #'
 #' @examples
 #'
-calculate_ac <- function (igraph_obj) {
+calculate_ac <- function (igraph_obj,alpha = 0.01) {
   start <- Sys.time()
-  message("[R] Calculating ac")
+  message("[R] Calculating ac for alpha = ",alpha )
   ac <-
     list(
       "ac" = unname(igraph::alpha.centrality(igraph_obj,
-                                                    alpha = 0.01,
+                                                    alpha = alpha,
                                                     exo = 1,
                                                     weights = NULL
                                                     ))

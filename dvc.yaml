@@ -5,12 +5,17 @@ vars:
       labelsdir: rawdata/labels/
   - features:
       bcdir: data/features/bc/
+      acdir: data/features/ac/
+      acdirnorm: data/features/ac/normalized/
+      acdirasis: data/features/ac/asis/
       dir: data/features/all/
       csvdir: data/features/csv/
       normdir: data/features/norm/
   - dataset:
       dir: data/labeled/
       normdir: data/labelednorm/
+
+
 stages:
   generate_ncol:
    cmd: bash code/bash/convert_net2ncol_all.sh  -o ${base.ncoldir} -i ${base.netflowdir}
@@ -22,8 +27,31 @@ stages:
    outs:
     - ${base.ncoldir}
    metrics:
-    - metrics/:
-        persist: true
+    - metrics/capture20110810_ncol.yaml:
+        cache: false
+    - metrics/capture20110811_ncol.yaml:
+        cache: false
+    - metrics/capture20110812_ncol.yaml:
+        cache: false
+    - metrics/capture20110815-2_ncol.yaml:
+        cache: false
+    - metrics/capture20110815-3_ncol.yaml:
+        cache: false
+    - metrics/capture20110815_ncol.yaml:
+        cache: false
+    - metrics/capture20110816-2_ncol.yaml:
+        cache: false
+    - metrics/capture20110816-3_ncol.yaml:
+        cache: false
+    - metrics/capture20110816_ncol.yaml:
+        cache: false
+    - metrics/capture20110817_ncol.yaml:
+        cache: false
+    - metrics/capture20110818-2_ncol.yaml:
+        cache: false
+    - metrics/capture20110818_ncol.yaml:
+        cache: false
+    - metrics/capture20110819_ncol.yaml:
         cache: false
         
   calculate_bc:
@@ -107,4 +135,44 @@ stages:
     - ${dataset.normdir}:
         persist: true
     
+  generate_ac:
+    cmd: bash code/bash/generate_ac_all.sh  -i ${base.ncoldir} -o ${features.acdir}
+    deps:
+    - code/bash/generate_ac_all.sh
+    - code/R/scripts/calculate_ac_cmd.R
+    - ${base.ncoldir}
+    params:
+    - calculate_ac.alphas
+    outs:
+    - ${features.acdirnorm}
+    - ${features.acdirasis}
+
+  tune_best_ac_for_kmeans:
+    cmd: Rscript code/R/scripts/tune_best_ac_for_kmeans_cmd.R --labeldir ${dataset.normdir} --acdir ${features.acdirnorm}
+    deps:
+     - ${features.acdir}
+     - ${dataset.normdir}
+     - code/R/scripts/tune_best_ac_for_kmeans_cmd.R
+     - code/R/functions/calculate_clustering.R
+    params:
+     - tune_best_ac_for_kmeans.centroids
+     - calculate_ac.alphas
+    metrics:
+     - metrics/kmeans/normalized:
+         cache: false
       
+  tune_best_ac_for_kmeans_asis:
+    cmd: Rscript code/R/scripts/tune_best_ac_for_kmeans_cmd.R --labeldir ${dataset.dir} --acdir ${features.acdirasis}
+    deps:
+     - ${features.acdir}
+     - ${dataset.dir}
+     - code/R/scripts/tune_best_ac_for_kmeans_cmd.R
+     - code/R/functions/calculate_clustering.R
+     
+    params:
+     - tune_best_ac_for_kmeans.centroids
+     - calculate_ac.alphas
+    metrics:
+     - metrics/kmeans/asis:
+         cache: false
+   
