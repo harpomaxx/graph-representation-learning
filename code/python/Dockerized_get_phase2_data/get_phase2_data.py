@@ -28,7 +28,7 @@ print(df_all)
 df_nolabel=df_all.drop(['label'], axis=1)
 cluster = setup(df_nolabel, session_id = 7652)
 
-kmeans = create_model('kmeans',num_clusters=25,n_init=1)
+kmeans = create_model('kmeans',num_clusters=25,n_init=1,n_jobs=1)
 
 kmeans_df = assign_model(kmeans)
 #add original labels to the df 
@@ -62,3 +62,5 @@ print(phase2_data['label'].value_counts())
 #save data to csv
 phase2_data.to_csv('./data/csv/phase2_data.csv', index=False)
 Centroids_df.to_csv('./data/csv/phase1_centroids.csv', index=False)
+
+
