@@ -1,0 +1,58 @@
+#! /bin/bash
+
+## PARA CORRER EN EL CAB
+
+## PASOS PREVIOS:
+
+## Paso 0:
+## Según el manual de usuario (https://fisica.cab.cnea.gov.ar/utilizacion#tips): 
+##  Si necesita conectarse a internet, por ejemplo para descargar software, necesita autenticarse (desde el frontend) con su cuenta de CNEA/IB en https://login.cnea.gob.ar:4100. Puede usar https://github.com/giox069/pyfauths/ para hacerlo desde la linea de comando. Ejemplo: python pyfauths.py login.cnea.gob.ar login cnea.ar usuario contraseña
+
+## Paso 1:
+## Autenticarse desde el frontend, o descargarse el archivo pyfauths.py
+
+## Paso 2:
+## Instalar pandas y tensorflow, usando miniconda:
+##      module load miniconda
+##      python pyfauths.py login.cnea.gob.ar login cnea.ar usuario contraseña
+##      conda create --name mi_entorno
+##      source activate mi_entorno
+##      pip install --user pandas
+##      pip install --user tensorflow
+##      source deactivate
+
+## Paso 3:
+## Cargar miniconda y activar mi_entorno en el script de qsub, es decir, en este script (más abajo explicado)
+
+
+##################################################################################################
+##################################################################################################
+
+
+# El sistema de cola devuelve una variable $SGE_GPU que contiene los IDs de los dispositivos requeridos (separados por coma). 
+# Ejemplo: 0 o 0,1 dependiendo del numero de recursos pedidos
+# Use este device ID para cudaSetDevice()
+
+#$ -cwd
+#$ -j y
+#$ -S /bin/bash
+#$ -q gpu
+#$ -l gpu=1
+#$ -l memoria_a_usar=1G
+#$ -N pruebaKeras
+#
+#cargar variables de entorno para encontrar cuda
+module load cuda/11.1.1
+
+echo DeviceID: $SGE_GPU
+
+#ejecutar binario con sus respectivos argumentos
+#./ejecutable
+
+## Paso 3:
+## Como nosotros corremos script de python, debemos cargar miniconda y activar mi_entorno (en mi caso, se llama doctp)
+
+module load miniconda
+source activate doctp
+python3 keras_demo.py
+
