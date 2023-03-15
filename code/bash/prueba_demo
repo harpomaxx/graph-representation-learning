@@ -24,6 +24,10 @@
 ## Paso 3:
 ## Cargar miniconda y activar mi_entorno en el script de qsub, es decir, en este script (más abajo explicado)
 
+## Paso 4:
+## Correr el demo: 
+##      qsub prueba_demo
+
 
 ##################################################################################################
 ##################################################################################################
