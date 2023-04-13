@@ -2,8 +2,14 @@
 
 # Create a dataframe with features of each capture (except 9, i.e. capture20110817) 
 
+# Note: pwd == /home/tati/Nextcloud/BotChase/graph-representation-learning/rawdata/harpo/captures-labeled-10-10-2022
+
+############################################################################################################################
+
+# Opción 1: agregar una columna que indique la captura
+
 # First capture
-df <- readr::read_csv("capture20110810_features.csv", show_col_types = FALSE)
+df <- readr::read_csv("capture20110810.binetflow.labels-positive-weights.labeled.csv", show_col_types = FALSE)
 df <- tibble::add_column(df, capture = rep(1, length(df$node)), .after = 1)
 
 # Captures in order from 2nd to 13th
@@ -12,7 +18,7 @@ aux = c("20110811", "20110812", "20110815", "20110815-2", "20110816", "20110816-
 i = 2
 for (date in aux) {
     if ( date != "20110817") {
-        cap <- readr::read_csv(paste("capture", date, "_features.csv", sep = ""), show_col_types = FALSE)
+        cap <- readr::read_csv(paste("capture", date, ".binetflow.labels-positive-weights.labeled.csv", sep = ""), show_col_types = FALSE)
         cap <- tibble::add_column(cap, capture = rep(i, length(cap$node)), .after = 1)
         df <- dplyr::bind_rows(df, cap)
         i <- i + 1
@@ -21,7 +27,32 @@ for (date in aux) {
     }
 }
 
-readr::write_csv(df, "all_captures_except_9_SINnormalizar.csv")
+readr::write_csv(df, "all_captures_except_9_SINnormalizar_pkts.csv")
 
 
+#############################################################################################################################
+
+
+# OPción 2: agregar la captura como prefijo del nombre de cada nodo
+
+# First capture
+df <- readr::read_csv("capture20110810.binetflow.labels-positive-weights.labeled.csv", show_col_types = FALSE)
+df$node <- sub("^", "1-", df$node)
+
+# Captures in order from 2nd to 13th
+aux = c("20110811", "20110812", "20110815", "20110815-2", "20110816", "20110816-2", "20110816-3", "20110817", "20110818", "20110818-2", "20110819", "20110815-3")
+
+i = 2
+for (date in aux) {
+    if ( date != "20110817") {
+        cap <- readr::read_csv(paste("capture", date, ".binetflow.labels-positive-weights.labeled.csv", sep = ""), show_col_types = FALSE)
+        cap$node <- sub("^", paste(as.character(i),"-",sep=""), cap$node)
+        df <- dplyr::bind_rows(df, cap)
+        i <- i + 1
+    } else {
+        i <- i + 1
+    }
+}
+
+readr::write_csv(df, "all_captures_except_9_SINnormalizar_pkts_changeNode.csv")
 
