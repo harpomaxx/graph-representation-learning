@@ -26,117 +26,26 @@ from sklearn.metrics import confusion_matrix,roc_auc_score,accuracy_score
 
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 
-import datasetsDirigidos 
-#import preprocess_adjacencyMatrix
-#import preprocess_features
+import datasetsDirigidos as dirigidos
+from preprocess_adjacencyMatrix import GCNConv_preprocess_adjacencyMatrix
+from preprocess_features import GCNConv_preprocess_features
 
 import sys
 
 #PATH_RDOS = ########## COMPLETAR CON SYS
 
-class synthetic_Dir_100nodes_balanced_clasesSep(Dataset):
-    """
-    10 (ten) synthetic graphs:
-      * directed (i.e. non-symmetric adjacency matrix)
-      * 100 nodes each
-      * 2 balanced classes of nodes
-      * "separated" classes (according to their graphical representation)
-      
-    **Arguments**
-    
-    - `flattened`: boolean, indicates whether the features will be flattened to 1.
-    It is False by default.
-    """    
-    def __init__(self, flattened = False, **kwargs):
-        self.flattened = flattened
-        super().__init__(**kwargs)
-
-    @property
-    def path(self):
-        return os.path.join(DATASET_FOLDER, "syntheticGraphs", self.__class__.__name__)
-    
-    def download(self):
-        os.makedirs(self.path)
-        
-        def generate_synthetic_graph_csbm(n_nodes, n_communities, n_features, edge_prob_matrix, node_feature_means,\
-                                  semilla, indice, feature_cov_matrix=None):
-            # Assign nodes to communities
-            np.random.seed(semilla*(indice+1))
-            communities = np.random.randint(0, n_communities, n_nodes)
-
-            # Generate node features
-            if feature_cov_matrix is None:
-                feature_cov_matrix = np.eye(n_features)
-            features = np.zeros((n_nodes, n_features))
-            for k in range(n_communities):
-                nodes_in_community = np.where(communities == k)[0]
-                features[nodes_in_community] = np.random.multivariate_normal(node_feature_means[k], feature_cov_matrix,\
-                                                                             len(nodes_in_community))
-
-            # Compute community membership probabilities based on node features
-            community_membership_probs = softmax(features @ node_feature_means.T, axis=1)
-
-            # Generate edges based on community membership probabilities
-            adjacency_matrix = np.zeros((n_nodes, n_nodes))
-            for i in range(n_nodes):
-                for j in range(n_nodes):
-                    if i == j:
-                        continue
-                    community_i = communities[i]
-                    community_j = communities[j]
-                    edge_prob = edge_prob_matrix[community_i, community_j] * community_membership_probs[i, community_j] * community_membership_probs[j, community_i]
-                    adjacency_matrix[i, j] = np.random.binomial(1, edge_prob)
-
-            labels = tf.keras.utils.to_categorical(communities)
-            adjacency_matrix = sparse.csr_matrix(adjacency_matrix)
-            return Graph(x=features, a=adjacency_matrix, y=labels)
-
-        
-        n_graphs = 10
-        n_nodes = 100
-        n_features = 2
-        n_classes = 2
-        # Probability matrix for edges between communities
-        edge_prob_matrix = np.array([
-                                        [0.8, 0.2],
-                                        [0.3, 0.7]
-                                    ])
-        # Node feature means for each community
-        node_feature_means = np.array([
-                                        [2, 1], #, 0, 0, 0],
-                                        [1, 2] #, 0, 0, 0]
-                                    ])
-        
-        semillas = [123, 234, 345, 456, 567, 678, 789, 321, 654, 987]
-        
-        # Bien separadas las clases:
-        graphs1 = [generate_synthetic_graph_csbm(n_nodes, n_classes, n_features, edge_prob_matrix, node_feature_means, semillas[i], 0, feature_cov_matrix=None) for i in range(n_graphs)]
-        for j in range(10):
-            filename = os.path.join(self.path, f'graph_Dir_100nodes_balanced_clasesSep_0{j}.npz')
-            np.savez(filename, x=graphs1[j].x, a=graphs1[j].a, y=graphs1[j].y)
-
-        # Free memory
-        del graphs1
-        gc.collect()
-
-
-    def read(self):
-        output = []
-        
-        n_nodes = 100
-        n_features = 2
-        
-        for j in range(10):
-            data = np.load(os.path.join(self.path, f'graph_Dir_100nodes_balanced_clasesSep_0{j}.npz'), allow_pickle=True)
-            if self.flattened:
-                x_features = np.ones((n_nodes, n_features))
-            else:
-                x_features = data['x']
-            output.append(
-                Graph(x=x_features, a=data['a'][()], y=data['y']) # también puede ser a=data['a'].item()
-            )     
-
-        return output
+# Limiting GPU memory growth
+gpus = tf.config.list_physical_devices('GPU')
+if gpus:
+  try:
+    # Currently, memory growth needs to be the same across GPUs
+    for gpu in gpus:
+      tf.config.experimental.set_memory_growth(gpu, True)
+    logical_gpus = tf.config.list_logical_devices('GPU')
+    print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
+  except RuntimeError as e:
+    # Memory growth must be set before GPUs have been initialized
+    print(e)
 
 
 
@@ -149,12 +58,17 @@ class SyntheticDataset(Dataset):
         return self.graphs
 
 
-dataset = synthetic_Dir_100nodes_balanced_clasesSep()#transforms=[preprocess_adjacencyMatrix(GCNConv,symmetric=False), preprocess_features()])
+dataset = dirigidos.synthetic_Dir_100nodes_balanced_clasesSep()#transforms=[preprocess_adjacencyMatrix(GCNConv,symmetric=False), preprocess_features()])
 
 
 
+guardarModelo = np.random.randint(10)
 
-for i in range(1):
+
+
+for i in range(10):
+    tf.keras.backend.clear_session() ### NO SE SI ESTO ESTA ANDANDO REALMENTE
+
     indices = np.concatenate((np.arange(i), np.arange(i+1,10)))
     graphs4train = dataset[indices]
     test_graphs = dataset[i:i+1]
@@ -177,19 +91,28 @@ for i in range(1):
     model.compile(optimizer=Adam(learning_rate=0.01), loss="binary_crossentropy", metrics=["accuracy"])
 
     # Define early stopping to prevent overfitting
-    callbacks_list = [
-        EarlyStopping(
-            monitor="val_loss",
-            patience=10,
-            verbose=1
-            ),
-        ModelCheckpoint(
-            filepath=f'resultados/Dir_100nodes_balanced_clasesSep/prueba_0{i}/modelo/',
-            monitor="val_loss",
-            save_best_only=True,
-            )
-    ]
-    #es_callback = EarlyStopping(monitor="val_loss", patience=10, restore_best_weights=True, verbose=1)
+    
+    if i==guardarModelo:
+        callbacks_list = [
+            EarlyStopping(
+                monitor="val_loss",
+                patience=10,
+                verbose=1
+                ),
+            ModelCheckpoint(
+                filepath=f'resultados/Dir_100nodes_balanced_clasesSep/prueba_0{i}/modelo/',
+                monitor="val_loss",
+                save_best_only=True,
+                )
+        ]
+    else:
+        callbacks_list = [
+            EarlyStopping(
+                monitor="val_loss",
+                patience=10,
+                verbose=1
+                )
+        ]
 
     # Train the model
     history = model.fit(
