@@ -26,13 +26,18 @@ from sklearn.metrics import confusion_matrix,roc_auc_score,accuracy_score
 
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 
-import datasetsDirigidos as dirigidos
+import datasetsDirigidos
 from preprocess_adjacencyMatrix import GCNConv_preprocess_adjacencyMatrix
 from preprocess_features import GCNConv_preprocess_features
 
 import sys
 
-#PATH_RDOS = ########## COMPLETAR CON SYS
+PATH_RDOS = sys.argv[1] 
+CLASE = sys.argv[2]
+FLATTENED = sys.argv[3]
+SYMMETRIC_ADJACENCY = sys.argv[4]
+PREPROC_ADJACENCY = sys.argv[5]
+PREPROC_FEATURES = sys.argv[6]
 
 # Limiting GPU memory growth
 gpus = tf.config.list_physical_devices('GPU')
@@ -58,15 +63,31 @@ class SyntheticDataset(Dataset):
         return self.graphs
 
 
-dataset = dirigidos.synthetic_Dir_100nodes_balanced_clasesSep()#transforms=[preprocess_adjacencyMatrix(GCNConv,symmetric=False), preprocess_features()])
+def instancia(clase, flatten=False, symmetricAdjacency=False, preprocAdjacency=True, preprocFeatures=True):
+    if preprocAdjacency and preprocFeatures:
+        inst = clase(flattened=flatten, transforms=[GCNConv_preprocess_adjacencyMatrix(GCNConv, symmetric=symmetricAdjacency), GCNConv_preprocess_features()])
+    elif preprocAdjacency and ~preprocFeatures:
+        inst = clase(flattened=flatten, transforms=[GCNConv_preprocess_adjacencyMatrix(GCNConv, symmetric=symmetricAdjacency)])
+    elif ~preprocAdjacency and preprocFeatures:
+        inst = clase(flattened=flatten, transforms=[GCNConv_preprocess_features()])
+    else:
+        inst = clase(flattened=flatten)
+    return inst
 
 
+dataset = instancia(CLASE, flatten=FLATTENED, symmetricAdjacency=SYMMETRIC_ADJACENCY, preprocAdjacency=PREPROC_ADJACENCY, preprocFeatures=PREPROC_FEATURES)
 
 guardarModelo = np.random.randint(10)
-
+modeloDirectorio = os.path.join(PATH_RDOS,f'/prueba_0{guardarModelo}/modelo')
+os.makedirs(modeloDirectorio, exist_ok = True)
 
 
 for i in range(10):
+    graficasDirectorio = os.path.join(PATH_RDOS,f'/prueba_0{i}/graficas')
+    prediccionesDirectorio = os.path.join(PATH_RDOS,f'/prueba_0{i}/predicciones')
+    os.makedirs(graficasDirectorio, exist_ok = True)
+    os.makedirs(prediccionesDirectorio, exist_ok = True)
+    
     tf.keras.backend.clear_session() ### NO SE SI ESTO ESTA ANDANDO REALMENTE
 
     indices = np.concatenate((np.arange(i), np.arange(i+1,10)))
@@ -90,8 +111,7 @@ for i in range(10):
     # Compile the model
     model.compile(optimizer=Adam(learning_rate=0.01), loss="binary_crossentropy", metrics=["accuracy"])
 
-    # Define early stopping to prevent overfitting
-    
+    # Define early stopping to prevent overfitting   
     if i==guardarModelo:
         callbacks_list = [
             EarlyStopping(
@@ -100,7 +120,7 @@ for i in range(10):
                 verbose=1
                 ),
             ModelCheckpoint(
-                filepath=f'resultados/Dir_100nodes_balanced_clasesSep/prueba_0{i}/modelo/',
+                filepath=modeloDirectorio,
                 monitor="val_loss",
                 save_best_only=True,
                 )
@@ -132,7 +152,7 @@ for i in range(10):
 
     # Rename the new column to 'row_id'
     res.rename(columns={'index': 'epoch'}, inplace=True)
-    res.to_csv(f'resultados/Dir_100nodes_balanced_clasesSep/prueba_0{i}/graficas/epochsResults.csv')                ### PODRIA GUARDAR ESTA INFO EN csv
+    res.to_csv(os.path.join(graficasDirectorio,"/epochsResults.csv"))           ### PODRIA GUARDAR ESTA INFO EN csv
 
     #history.history['accuracy']
     sns.set_theme(style="whitegrid")
@@ -150,7 +170,7 @@ for i in range(10):
     plt.legend()
 
     # Show the plot
-    plt.savefig(f'resultados/Dir_100nodes_balanced_clasesSep/prueba_0{i}/graficas/loss.png')                              ### GUARDAR IMAGEN
+    plt.savefig(os.path.join(graficasDirectorio,"/loss.png"))                              ### GUARDAR IMAGEN
 
     sns.set_theme(style="whitegrid")
     line1 = sns.lineplot(x="epoch", y="accuracy", data=res, label='Training Accuracy')
@@ -167,7 +187,7 @@ for i in range(10):
     plt.legend()
 
     # Show the plot
-    plt.savefig(f'resultados/Dir_100nodes_balanced_clasesSep/prueba_0{i}/graficas/accuracy.png')               ### GUARDAR LA IMAGEN
+    plt.savefig(os.path.join(graficasDirectorio,"/accuracy.png"))               ### GUARDAR LA IMAGEN
 
     # PREDICCION EN TEST
     tutti = [test_loader, val_loader, train_loader]
@@ -177,7 +197,7 @@ for i in range(10):
         y_prediction = np.argmax(np.vstack(y_prediction), axis = 1)
         y_test=np.argmax(np.vstack(target), axis=1)
         prediccion=pd.DataFrame({"true_label":y_test, "prediction":y_prediction})
-        prediccion.to_csv(f'resultados/Dir_100nodes_balanced_clasesSep/prueba_0{i}/predicciones/prediccion.csv')
+        prediccion.to_csv(os.path.join(graficasDirectorio,"/prediccion.csv"))
         #Create confusion matrix and normalizes it over predicted (columns)
         result = tf.math.confusion_matrix(y_test, y_prediction, num_classes=2) 
         print(result)
