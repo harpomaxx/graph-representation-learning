@@ -2,7 +2,7 @@ from spektral.layers import GCNConv
 from spektral.utils import gcn_filter
 
 
-class GCNConv_preprocess(object):
+class GCNConv_preprocess_adjacencyMatrix(object):
     """
     Applies the `gcn_filter` function of a GCN Layer to the adjacency
     matrix. The result depends on symmetry of adjacency matrix.
