@@ -32,12 +32,18 @@ from preprocess_features import GCNConv_preprocess_features
 
 import sys
 
-PATH_RDOS = sys.argv[1] 
-CLASE = sys.argv[2]
-FLATTENED = sys.argv[3]
-SYMMETRIC_ADJACENCY = sys.argv[4]
-PREPROC_ADJACENCY = sys.argv[5]
-PREPROC_FEATURES = sys.argv[6]
+PATH_RDO = str(sys.argv[1]) 
+CLASE = eval(sys.argv[2])
+FLATTENED = eval(sys.argv[3])
+SYMMETRIC_ADJACENCY = eval(sys.argv[4])
+PREPROC_ADJACENCY = eval(sys.argv[5])
+PREPROC_FEATURES = eval(sys.argv[6])
+
+if FLATTENED:
+    PATH_RDOS = os.path.join(PATH_RDO, "flattened")
+else: 
+    PATH_RDOS = os.path.join(PATH_RDO, "NO_flattened")
+
 
 # Limiting GPU memory growth
 gpus = tf.config.list_physical_devices('GPU')
@@ -54,13 +60,13 @@ if gpus:
 
 
 
-class SyntheticDataset(Dataset):
-    def __init__(self, graphs=None, **kwargs):
-        self.graphs = graphs
-        super().__init__(**kwargs)
-
-    def read(self):
-        return self.graphs
+#class SyntheticDataset(Dataset):
+#    def __init__(self, graphs=None, **kwargs):
+#        self.graphs = graphs
+#        super().__init__(**kwargs)
+#
+#    def read(self):
+#        return self.graphs
 
 
 def instancia(clase, flatten=False, symmetricAdjacency=False, preprocAdjacency=True, preprocFeatures=True):
@@ -75,35 +81,80 @@ def instancia(clase, flatten=False, symmetricAdjacency=False, preprocAdjacency=T
     return inst
 
 
+def predicciones(loader, path, nombre):
+    for _ in range(loader.steps_per_epoch):
+        metricas = open(path, "a")
+        inputs,target = loader.__next__()
+        y_prediction = model(inputs, training=False)
+        y_prediction = np.argmax(np.vstack(y_prediction), axis = 1)
+        y_true=np.argmax(np.vstack(target), axis=1)
+        prediccion=pd.DataFrame({"true_label":y_true, "prediction":y_prediction})
+        prediccion.to_csv(os.path.join(prediccionesDirectorio,f'prediccion_{str(nombre)}.csv'),index = None)
+        #Create confusion matrix and normalizes it over predicted (columns)
+        result = tf.math.confusion_matrix(y_true, y_prediction, num_classes=2) 
+        metricas.write(f'confusion matrix:\n {str(result)}\n')
+
+        # confusion_matrix = [[TP, FN],
+        #                     [FP, TN]]
+        TP = result[0,0].numpy()
+        FN = result[0,1].numpy()
+        FP = result[1,0].numpy()
+        TN = result[1,1].numpy()
+
+        accuracy = (TP+TN)/(TP+FP+FN+TN)
+        precision = TP/(TP+FP)
+        recall = TP/(TP+FN)
+        especificity = TN/(TN+FP)
+        f1 = (2*precision*recall)/(precision+recall)
+        auc_score = roc_auc_score(y_true, y_prediction)
+        
+        metricas.write(f'accuracy: {str(accuracy)}\n')
+        metricas.write(f'precision: {str(precision)}\n')
+        metricas.write(f'recall: {str(recall)}\n')
+        metricas.write(f'especificity: {str(especificity)}\n')
+        metricas.write(f'f1: {str(f1)}\n')
+        metricas.write(f'auc_score: {str(auc_score)}\n')
+        metricas.write("==============================\n")
+        
+        metricas.close()
+
+
+###################################################################################
+
 dataset = instancia(CLASE, flatten=FLATTENED, symmetricAdjacency=SYMMETRIC_ADJACENCY, preprocAdjacency=PREPROC_ADJACENCY, preprocFeatures=PREPROC_FEATURES)
 
 guardarModelo = np.random.randint(10)
-modeloDirectorio = os.path.join(PATH_RDOS,f'/prueba_0{guardarModelo}/modelo')
+modeloDirectorio = os.path.join(PATH_RDOS,f'prueba_0{guardarModelo}/modelo')
 os.makedirs(modeloDirectorio, exist_ok = True)
 
 
 for i in range(10):
-    graficasDirectorio = os.path.join(PATH_RDOS,f'/prueba_0{i}/graficas')
-    prediccionesDirectorio = os.path.join(PATH_RDOS,f'/prueba_0{i}/predicciones')
+    graficasDirectorio = os.path.join(PATH_RDOS,f'prueba_0{i}/graficas')
+    prediccionesDirectorio = os.path.join(PATH_RDOS,f'prueba_0{i}/predicciones')
+    metricasDirectorio = os.path.join(PATH_RDOS,f'prueba_0{i}/metricas')
+    
     os.makedirs(graficasDirectorio, exist_ok = True)
     os.makedirs(prediccionesDirectorio, exist_ok = True)
+    os.makedirs(metricasDirectorio, exist_ok = True)
     
     tf.keras.backend.clear_session() ### NO SE SI ESTO ESTA ANDANDO REALMENTE
 
     indices = np.concatenate((np.arange(i), np.arange(i+1,10)))
     graphs4train = dataset[indices]
-    test_graphs = dataset[i:i+1]
+    test_dataset = dataset[i:i+1]
     
-    train_graphs, val_graphs = train_test_split(graphs4train, test_size=0.1, random_state=42)
-    train_dataset = SyntheticDataset(train_graphs)
-    val_dataset = SyntheticDataset(val_graphs)
-    test_dataset = SyntheticDataset(test_graphs)
+    idxs = np.random.permutation(len(graphs4train))
+    split_va = int(0.9 * len(graphs4train))
+    idx_tr, idx_va = np.split(idxs, [split_va])
+    train_dataset = graphs4train[idx_tr]
+    val_dataset = graphs4train[idx_va]
     
     batch_size = 1
+    n_epochs = 200
     # Create data loaders for training and testing data
-    train_loader = BatchLoader(train_dataset, batch_size=batch_size)
-    val_loader = SingleLoader(val_dataset)
-    test_loader = SingleLoader(test_dataset)
+    train_loader = BatchLoader(train_dataset, batch_size=batch_size, epochs=n_epochs, shuffle=False, node_level=True)   ####### ATENCION: mask y shuffle
+    val_loader = SingleLoader(val_dataset, epochs=n_epochs)
+    test_loader = SingleLoader(test_dataset, epochs=n_epochs)
 
     n_classes=2
     model = GCN(n_labels=n_classes)
@@ -138,90 +189,51 @@ for i in range(10):
     history = model.fit(
         train_loader.load(),
         steps_per_epoch=train_loader.steps_per_epoch,
-        epochs=200,
+        epochs=n_epochs,
         validation_data=val_loader.load(),
         validation_steps=val_loader.steps_per_epoch,
-        callbacks=callbacks_list                             ### ARMAR UNA CARPETA PARA GUARDAR EL MODELO
+        callbacks=callbacks_list                            
     )
     
     ## GRAFICAR
     res=pd.DataFrame(history.history)
-
     # Add row index as a new column
     res.reset_index(inplace=True)
-
     # Rename the new column to 'row_id'
     res.rename(columns={'index': 'epoch'}, inplace=True)
-    res.to_csv(os.path.join(graficasDirectorio,"/epochsResults.csv"))           ### PODRIA GUARDAR ESTA INFO EN csv
-
-    #history.history['accuracy']
+    res.to_csv(os.path.join(graficasDirectorio,"epochsResults.csv"),index = None)          
+    
     sns.set_theme(style="whitegrid")
     line1 = sns.lineplot(x="epoch", y='loss', data=res, label='Training Loss')
     line2 = sns.lineplot(x="epoch", y='val_loss', data=res, label='Test Loss')
-
     # Add points to each observation
     scatter1 = sns.scatterplot(x="epoch", y='loss', data=res, marker='o', color='skyblue')
     scatter2 = sns.scatterplot(x="epoch", y='val_loss', data=res, marker='o', color='orange')
-
     # Change the y-axis label
     plt.ylabel("Loss Value")
-
     # Create a legend for the lines
     plt.legend()
-
     # Show the plot
-    plt.savefig(os.path.join(graficasDirectorio,"/loss.png"))                              ### GUARDAR IMAGEN
-
+    plt.savefig(os.path.join(graficasDirectorio,"loss.png"))                             
+    plt.clf()
+    
     sns.set_theme(style="whitegrid")
     line1 = sns.lineplot(x="epoch", y="accuracy", data=res, label='Training Accuracy')
     line2 = sns.lineplot(x="epoch", y="val_accuracy", data=res, label='Test Accuracy')
-
     # Add points to each observation
     scatter1 = sns.scatterplot(x="epoch", y="accuracy", data=res, marker='o', color='skyblue')
     scatter2 = sns.scatterplot(x="epoch", y="val_accuracy", data=res, marker='o', color='orange')
-
     # Change the y-axis label
     plt.ylabel("Accuracy Value")
-
     # Create a legend for the lines
     plt.legend()
-
     # Show the plot
-    plt.savefig(os.path.join(graficasDirectorio,"/accuracy.png"))               ### GUARDAR LA IMAGEN
-
-    # PREDICCION EN TEST
-    tutti = [test_loader, val_loader, train_loader]
-    for _ in range(test_loader.steps_per_epoch):
-        inputs,target = test_loader.__next__()
-        y_prediction = model(inputs, training=False)
-        y_prediction = np.argmax(np.vstack(y_prediction), axis = 1)
-        y_test=np.argmax(np.vstack(target), axis=1)
-        prediccion=pd.DataFrame({"true_label":y_test, "prediction":y_prediction})
-        prediccion.to_csv(os.path.join(graficasDirectorio,"/prediccion.csv"))
-        #Create confusion matrix and normalizes it over predicted (columns)
-        result = tf.math.confusion_matrix(y_test, y_prediction, num_classes=2) 
-        print(result)
-
-        # confusion_matrix = [[TP, FN],
-        #                     [FP, TN]]
-        TP = result[0,0].numpy()
-        FN = result[0,1].numpy()
-        FP = result[1,0].numpy()
-        TN = result[1,1].numpy()
-
-        accuracy = (TP+TN)/(TP+FP+FN+TN)
-        precision = TP/(TP+FP)
-        recall = TP/(TP+FN)
-        especificity = TN/(TN+FP)
-        f1 = (2*precision*recall)/(precision+recall)
-        auc_score = roc_auc_score(y_test, y_prediction)
-
-        print("accuracy (exactitud) = ", accuracy) # cantidad de predicciones positivas que fueron correctas
-        print("precision = ", precision) # proporcion de casos positivos detectados
-        print("recall = ", recall) # casos positivos que fueron correctamente identificadas por el algoritmo
-        print("especificity = ", especificity) # casos negativos que el algoritmo ha clasificado correctamente
-        print("f1 = ", f1)
-        print("auc_score = ", auc_score)
-        print("==============================")
-
-
+    plt.savefig(os.path.join(graficasDirectorio,"accuracy.png"))              
+    plt.clf()
+    
+    # PREDICCION
+    loaders = [test_loader, val_loader, train_loader]
+    names = ["test", "val", "train"]
+    for j in range(len(loaders)):
+        predicciones(loaders[j], os.path.join(metricasDirectorio,f'metricas_{str(names[j])}.txt'), names[j])
+        
