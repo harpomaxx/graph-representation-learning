@@ -2917,3 +2917,695 @@ class synthetic_Dir_diffSize_NoBalanced_20percent_clasesMezcl(Dataset):
 
         return output
     
+
+###########################################################################################################################################################################################################
+
+  
+######################################################################################################################################
+###                                   Dirigido - 1000 nodos - clases balanceadas                                                   ###
+######################################################################################################################################
+
+
+class synthetic_Dir_1000nodes_balanced_clasesSep(Dataset):
+    """
+    10 (ten) synthetic graphs:
+      * directed (i.e. non-symmetric adjacency matrix)
+      * 1000 nodes each
+      * 2 balanced classes of nodes
+      * "separated" classes 
+      
+    **Arguments**
+    
+    - `flattened`: boolean, indicates whether the features will be flattened to 1.
+    It is False by default.
+    """    
+    def __init__(self, flattened = False, **kwargs):
+        self.flattened = flattened
+        super().__init__(**kwargs)
+
+    @property
+    def path(self):
+        return os.path.join(DATASET_FOLDER, "syntheticGraphs", self.__class__.__name__)
+    
+    def download(self):
+        os.makedirs(self.path)
+        
+        def generate_synthetic_graph_csbm(n_nodes, n_communities, n_features, edge_prob_matrix, node_feature_means,\
+                                  semilla, indice, feature_cov_matrix=None):
+            # Assign nodes to communities
+            np.random.seed(semilla*(indice+1))
+            communities = np.random.randint(0, n_communities, n_nodes)
+
+            # Generate node features
+            if feature_cov_matrix is None:
+                feature_cov_matrix = np.eye(n_features)
+            features = np.zeros((n_nodes, n_features))
+            for k in range(n_communities):
+                nodes_in_community = np.where(communities == k)[0]
+                features[nodes_in_community] = np.random.multivariate_normal(node_feature_means[k], feature_cov_matrix,\
+                                                                             len(nodes_in_community))
+
+            # Compute community membership probabilities based on node features
+            community_membership_probs = softmax(features @ node_feature_means.T, axis=1)
+
+            # Generate edges based on community membership probabilities
+            adjacency_matrix = np.zeros((n_nodes, n_nodes))
+            for i in range(n_nodes):
+                for j in range(n_nodes):
+                    if i == j:
+                        continue
+                    community_i = communities[i]
+                    community_j = communities[j]
+                    edge_prob = edge_prob_matrix[community_i, community_j] * community_membership_probs[i, community_j] * community_membership_probs[j, community_i]
+                    adjacency_matrix[i, j] = np.random.binomial(1, edge_prob)
+
+            labels = tf.keras.utils.to_categorical(communities)
+            adjacency_matrix = sparse.csr_matrix(adjacency_matrix)
+            return Graph(x=features, a=adjacency_matrix, y=labels)
+
+        
+        n_graphs = 10
+        n_nodes = 1000
+        n_features = 2
+        n_classes = 2
+        # Probability matrix for edges between communities
+        edge_prob_matrix = np.array([
+                                        [0.8, 0.2],
+                                        [0.3, 0.7]
+                                    ])
+        # Node feature means for each community
+        node_feature_means = np.array([
+                                        [2, 1], #, 0, 0, 0],
+                                        [1, 2] #, 0, 0, 0]
+                                    ])
+        
+        semillas = [123, 234, 345, 456, 567, 678, 789, 321, 654, 987]
+        
+        # Bien separadas las clases:
+        graphs1 = [generate_synthetic_graph_csbm(n_nodes, n_classes, n_features, edge_prob_matrix, node_feature_means, semillas[i], 0, feature_cov_matrix=None) for i in range(n_graphs)]
+        for j in range(10):
+            filename = os.path.join(self.path, f'graph_Dir_1000nodes_balanced_clasesSep_0{j}.npz')
+            np.savez(filename, x=graphs1[j].x, a=graphs1[j].a, y=graphs1[j].y)
+
+        # Free memory
+        del graphs1
+        gc.collect()
+
+
+    def read(self):
+        output = []
+        
+        n_nodes = 1000
+        n_features = 2
+        
+        for j in range(10):
+            data = np.load(os.path.join(self.path, f'graph_Dir_1000nodes_balanced_clasesSep_0{j}.npz'), allow_pickle=True)
+            if self.flattened:
+                x_features = np.ones((n_nodes, n_features))
+            else:
+                x_features = data['x']
+            output.append(
+                Graph(x=x_features, a=data['a'][()], y=data['y']) # también puede ser a=data['a'].item()
+            )     
+
+        return output
+
+
+###########################################################################################################################################################################################################
+
+
+######################################################################################################################################
+###                                        Dirigido - 1000 nodos - clases NO balanceadas                                           ###
+######################################################################################################################################
+
+
+class synthetic_Dir_1000nodes_NoBalanced_10a1000_clasesSep(Dataset):
+    """
+    10 (ten) synthetic graphs:
+      * directed (i.e. non-symmetric adjacency matrix)
+      * 1000 nodes each
+      * 2 unbalanced classes: 1% for the minority class
+      * "separated" classes 
+      
+    **Arguments**
+    
+    - `flattened`: boolean, indicates whether the features will be flattened to 1.
+    It is False by default.
+    
+    """   
+    def __init__(self, flattened = False, **kwargs):
+        self.flattened = flattened
+        super().__init__(**kwargs)
+
+    @property
+    def path(self):
+        return os.path.join(DATASET_FOLDER, "syntheticGraphs", self.__class__.__name__)
+    
+    def download(self):
+        os.makedirs(self.path)
+        
+        def generate_synthetic_graph_csbm(n_nodes, n_communities, n_features, edge_prob_matrix, node_feature_means,\
+                                  n_infected, semilla, indice, feature_cov_matrix=None):
+            # Assign nodes to communities
+            np.random.seed(semilla*(indice+1))
+            indices = [np.random.randint(0,n_nodes) for i in range(n_infected)]
+            communities = np.array([int(j in indices) for j in range(n_nodes)])
+
+            # Generate node features
+            if feature_cov_matrix is None:
+                feature_cov_matrix = np.eye(n_features)
+            features = np.zeros((n_nodes, n_features))
+            for k in range(n_communities):
+                nodes_in_community = np.where(communities == k)[0]
+                features[nodes_in_community] = np.random.multivariate_normal(node_feature_means[k], feature_cov_matrix,\
+                                                                             len(nodes_in_community))
+
+            # Compute community membership probabilities based on node features
+            community_membership_probs = softmax(features @ node_feature_means.T, axis=1)
+
+            # Generate edges based on community membership probabilities
+            adjacency_matrix = np.zeros((n_nodes, n_nodes))
+            for i in range(n_nodes):
+                for j in range(n_nodes):
+                    if i == j:
+                        continue
+                    community_i = communities[i]
+                    community_j = communities[j]
+                    edge_prob = edge_prob_matrix[community_i, community_j] * community_membership_probs[i, community_j] * community_membership_probs[j, community_i]
+                    adjacency_matrix[i, j] = np.random.binomial(1, edge_prob)
+
+            labels = tf.keras.utils.to_categorical(communities)
+            adjacency_matrix = sparse.csr_matrix(adjacency_matrix)
+            return Graph(x=features, a=adjacency_matrix, y=labels)
+
+        
+        n_graphs = 10
+        n_nodes = 1000
+        n_features = 2
+        n_classes = 2
+        n_infected = 10
+        # Probability matrix for edges between communities
+        edge_prob_matrix = np.array([
+                                        [0.8, 0.2],
+                                        [0.3, 0.7]
+                                    ])
+        # Node feature means for each community
+        node_feature_means = np.array([
+                                        [2, 1], #, 0, 0, 0],
+                                        [1, 2] #, 0, 0, 0]
+                                    ])
+        
+        semillas = [123, 234, 345, 456, 567, 679, 789, 321, 654, 987]
+        
+        # Bien separadas las clases:
+        graphs1 = [generate_synthetic_graph_csbm(n_nodes, n_classes, n_features, edge_prob_matrix, node_feature_means, n_infected, semillas[i], 0, feature_cov_matrix=None) for i in range(n_graphs)]
+        for j in range(10):
+            filename = os.path.join(self.path, f'graph_Dir_1000nodes_NoBalanced_10a1000_clasesSep_0{j}.npz')
+            np.savez(filename, x=graphs1[j].x, a=graphs1[j].a, y=graphs1[j].y)
+
+        # Free memory
+        del graphs1
+        gc.collect()
+
+
+    def read(self):
+        output = []
+        
+        n_nodes = 1000
+        n_features = 2
+        
+        for j in range(10):
+            data = np.load(os.path.join(self.path, f'graph_Dir_1000nodes_NoBalanced_10a1000_clasesSep_0{j}.npz'), allow_pickle=True)
+            if self.flattened:
+                x_features = np.ones((n_nodes, n_features))
+            else:
+                x_features = data['x']
+            output.append(
+                Graph(x=x_features, a=data['a'][()], y=data['y']) # también puede ser a=data['a'].item()
+            )
+
+        return output
+    
+
+###########################################################################################################################################################################################################
+
+
+
+    
+###########################################################################################################################################################################################################
+
+
+class synthetic_Dir_1000nodes_NoBalanced_20a1000_clasesSep(Dataset):
+    """
+    10 (ten) synthetic graphs:
+      * directed (i.e. non-symmetric adjacency matrix)
+      * 1000 nodes each
+      * 2 unbalanced classes: 2% for the minority class
+      * "separated" classes 
+      
+    **Arguments**
+    
+    - `flattened`: boolean, indicates whether the features will be flattened to 1.
+    It is False by default.
+    
+    """   
+    def __init__(self, flattened = False, **kwargs):
+        self.flattened = flattened
+        super().__init__(**kwargs)
+
+    @property
+    def path(self):
+        return os.path.join(DATASET_FOLDER, "syntheticGraphs", self.__class__.__name__)
+    
+    def download(self):
+        os.makedirs(self.path)
+        
+        def generate_synthetic_graph_csbm(n_nodes, n_communities, n_features, edge_prob_matrix, node_feature_means,\
+                                  n_infected, semilla, indice, feature_cov_matrix=None):
+            # Assign nodes to communities
+            np.random.seed(semilla*(indice+1))
+            indices = [np.random.randint(0,n_nodes) for i in range(n_infected)]
+            communities = np.array([int(j in indices) for j in range(n_nodes)])
+
+            # Generate node features
+            if feature_cov_matrix is None:
+                feature_cov_matrix = np.eye(n_features)
+            features = np.zeros((n_nodes, n_features))
+            for k in range(n_communities):
+                nodes_in_community = np.where(communities == k)[0]
+                features[nodes_in_community] = np.random.multivariate_normal(node_feature_means[k], feature_cov_matrix,\
+                                                                             len(nodes_in_community))
+
+            # Compute community membership probabilities based on node features
+            community_membership_probs = softmax(features @ node_feature_means.T, axis=1)
+
+            # Generate edges based on community membership probabilities
+            adjacency_matrix = np.zeros((n_nodes, n_nodes))
+            for i in range(n_nodes):
+                for j in range(n_nodes):
+                    if i == j:
+                        continue
+                    community_i = communities[i]
+                    community_j = communities[j]
+                    edge_prob = edge_prob_matrix[community_i, community_j] * community_membership_probs[i, community_j] * community_membership_probs[j, community_i]
+                    adjacency_matrix[i, j] = np.random.binomial(1, edge_prob)
+
+            labels = tf.keras.utils.to_categorical(communities)
+            adjacency_matrix = sparse.csr_matrix(adjacency_matrix)
+            return Graph(x=features, a=adjacency_matrix, y=labels)
+
+        
+        n_graphs = 10
+        n_nodes = 1000
+        n_features = 2
+        n_classes = 2
+        n_infected = 20
+        # Probability matrix for edges between communities
+        edge_prob_matrix = np.array([
+                                        [0.8, 0.2],
+                                        [0.3, 0.7]
+                                    ])
+        # Node feature means for each community
+        node_feature_means = np.array([
+                                        [2, 1], #, 0, 0, 0],
+                                        [1, 2] #, 0, 0, 0]
+                                    ])
+        
+        semillas = [123, 234, 345, 456, 567, 679, 789, 321, 654, 987]
+        
+        # Bien separadas las clases:
+        graphs1 = [generate_synthetic_graph_csbm(n_nodes, n_classes, n_features, edge_prob_matrix, node_feature_means, n_infected, semillas[i], 0, feature_cov_matrix=None) for i in range(n_graphs)]
+        for j in range(10):
+            filename = os.path.join(self.path, f'graph_Dir_1000nodes_NoBalanced_20a1000_clasesSep_0{j}.npz')
+            np.savez(filename, x=graphs1[j].x, a=graphs1[j].a, y=graphs1[j].y)
+
+        # Free memory
+        del graphs1
+        gc.collect()
+
+
+    def read(self):
+        output = []
+        
+        n_nodes = 1000
+        n_features = 2
+        
+        for j in range(10):
+            data = np.load(os.path.join(self.path, f'graph_Dir_1000nodes_NoBalanced_20a1000_clasesSep_0{j}.npz'), allow_pickle=True)
+            if self.flattened:
+                x_features = np.ones((n_nodes, n_features))
+            else:
+                x_features = data['x']
+            output.append(
+                Graph(x=x_features, a=data['a'][()], y=data['y']) # también puede ser a=data['a'].item()
+            )
+
+        return output
+    
+
+###########################################################################################################################################################################################################
+
+
+
+
+###########################################################################################################################################################################################################
+
+
+class synthetic_Dir_1000nodes_NoBalanced_50a1000_clasesSep(Dataset):
+    """
+    10 (ten) synthetic graphs:
+      * directed (i.e. non-symmetric adjacency matrix)
+      * 1000 nodes each
+      * 2 unbalanced classes: 5% for the minority class
+      * "separated" classes 
+      
+    **Arguments**
+    
+    - `flattened`: boolean, indicates whether the features will be flattened to 1.
+    It is False by default.
+    
+    """   
+    def __init__(self, flattened = False, **kwargs):
+        self.flattened = flattened
+        super().__init__(**kwargs)
+
+    @property
+    def path(self):
+        return os.path.join(DATASET_FOLDER, "syntheticGraphs", self.__class__.__name__)
+    
+    def download(self):
+        os.makedirs(self.path)
+        
+        def generate_synthetic_graph_csbm(n_nodes, n_communities, n_features, edge_prob_matrix, node_feature_means,\
+                                  n_infected, semilla, indice, feature_cov_matrix=None):
+            # Assign nodes to communities
+            np.random.seed(semilla*(indice+1))
+            indices = [np.random.randint(0,n_nodes) for i in range(n_infected)]
+            communities = np.array([int(j in indices) for j in range(n_nodes)])
+
+            # Generate node features
+            if feature_cov_matrix is None:
+                feature_cov_matrix = np.eye(n_features)
+            features = np.zeros((n_nodes, n_features))
+            for k in range(n_communities):
+                nodes_in_community = np.where(communities == k)[0]
+                features[nodes_in_community] = np.random.multivariate_normal(node_feature_means[k], feature_cov_matrix,\
+                                                                             len(nodes_in_community))
+
+            # Compute community membership probabilities based on node features
+            community_membership_probs = softmax(features @ node_feature_means.T, axis=1)
+
+            # Generate edges based on community membership probabilities
+            adjacency_matrix = np.zeros((n_nodes, n_nodes))
+            for i in range(n_nodes):
+                for j in range(n_nodes):
+                    if i == j:
+                        continue
+                    community_i = communities[i]
+                    community_j = communities[j]
+                    edge_prob = edge_prob_matrix[community_i, community_j] * community_membership_probs[i, community_j] * community_membership_probs[j, community_i]
+                    adjacency_matrix[i, j] = np.random.binomial(1, edge_prob)
+
+            labels = tf.keras.utils.to_categorical(communities)
+            adjacency_matrix = sparse.csr_matrix(adjacency_matrix)
+            return Graph(x=features, a=adjacency_matrix, y=labels)
+
+        
+        n_graphs = 10
+        n_nodes = 1000
+        n_features = 2
+        n_classes = 2
+        n_infected = 50
+        # Probability matrix for edges between communities
+        edge_prob_matrix = np.array([
+                                        [0.8, 0.2],
+                                        [0.3, 0.7]
+                                    ])
+        # Node feature means for each community
+        node_feature_means = np.array([
+                                        [2, 1], #, 0, 0, 0],
+                                        [1, 2] #, 0, 0, 0]
+                                    ])
+        
+        semillas = [123, 234, 345, 456, 567, 679, 789, 321, 654, 987]
+        
+        # Bien separadas las clases:
+        graphs1 = [generate_synthetic_graph_csbm(n_nodes, n_classes, n_features, edge_prob_matrix, node_feature_means, n_infected, semillas[i], 0, feature_cov_matrix=None) for i in range(n_graphs)]
+        for j in range(10):
+            filename = os.path.join(self.path, f'graph_Dir_1000nodes_NoBalanced_50a1000_clasesSep_0{j}.npz')
+            np.savez(filename, x=graphs1[j].x, a=graphs1[j].a, y=graphs1[j].y)
+
+        # Free memory
+        del graphs1
+        gc.collect()
+
+
+    def read(self):
+        output = []
+        
+        n_nodes = 1000
+        n_features = 2
+        
+        for j in range(10):
+            data = np.load(os.path.join(self.path, f'graph_Dir_1000nodes_NoBalanced_50a1000_clasesSep_0{j}.npz'), allow_pickle=True)
+            if self.flattened:
+                x_features = np.ones((n_nodes, n_features))
+            else:
+                x_features = data['x']
+            output.append(
+                Graph(x=x_features, a=data['a'][()], y=data['y']) # también puede ser a=data['a'].item()
+            )
+
+        return output    
+    
+
+###########################################################################################################################################################################################################
+
+
+
+###########################################################################################################################################################################################################
+
+
+class synthetic_Dir_1000nodes_NoBalanced_100a1000_clasesSep(Dataset):
+    """
+    10 (ten) synthetic graphs:
+      * directed (i.e. non-symmetric adjacency matrix)
+      * 1000 nodes each
+      * 2 unbalanced classes: 10% for the minority class
+      * "separated" classes 
+      
+    **Arguments**
+    
+    - `flattened`: boolean, indicates whether the features will be flattened to 1.
+    It is False by default.
+    
+    """   
+    def __init__(self, flattened = False, **kwargs):
+        self.flattened = flattened
+        super().__init__(**kwargs)
+
+    @property
+    def path(self):
+        return os.path.join(DATASET_FOLDER, "syntheticGraphs", self.__class__.__name__)
+    
+    def download(self):
+        os.makedirs(self.path)
+        
+        def generate_synthetic_graph_csbm(n_nodes, n_communities, n_features, edge_prob_matrix, node_feature_means,\
+                                  n_infected, semilla, indice, feature_cov_matrix=None):
+            # Assign nodes to communities
+            np.random.seed(semilla*(indice+1))
+            indices = [np.random.randint(0,n_nodes) for i in range(n_infected)]
+            communities = np.array([int(j in indices) for j in range(n_nodes)])
+
+            # Generate node features
+            if feature_cov_matrix is None:
+                feature_cov_matrix = np.eye(n_features)
+            features = np.zeros((n_nodes, n_features))
+            for k in range(n_communities):
+                nodes_in_community = np.where(communities == k)[0]
+                features[nodes_in_community] = np.random.multivariate_normal(node_feature_means[k], feature_cov_matrix,\
+                                                                             len(nodes_in_community))
+
+            # Compute community membership probabilities based on node features
+            community_membership_probs = softmax(features @ node_feature_means.T, axis=1)
+
+            # Generate edges based on community membership probabilities
+            adjacency_matrix = np.zeros((n_nodes, n_nodes))
+            for i in range(n_nodes):
+                for j in range(n_nodes):
+                    if i == j:
+                        continue
+                    community_i = communities[i]
+                    community_j = communities[j]
+                    edge_prob = edge_prob_matrix[community_i, community_j] * community_membership_probs[i, community_j] * community_membership_probs[j, community_i]
+                    adjacency_matrix[i, j] = np.random.binomial(1, edge_prob)
+
+            labels = tf.keras.utils.to_categorical(communities)
+            adjacency_matrix = sparse.csr_matrix(adjacency_matrix)
+            return Graph(x=features, a=adjacency_matrix, y=labels)
+
+        
+        n_graphs = 10
+        n_nodes = 1000
+        n_features = 2
+        n_classes = 2
+        n_infected = 100
+        # Probability matrix for edges between communities
+        edge_prob_matrix = np.array([
+                                        [0.8, 0.2],
+                                        [0.3, 0.7]
+                                    ])
+        # Node feature means for each community
+        node_feature_means = np.array([
+                                        [2, 1], #, 0, 0, 0],
+                                        [1, 2] #, 0, 0, 0]
+                                    ])
+        
+        semillas = [123, 234, 345, 456, 567, 679, 789, 321, 654, 987]
+        
+        # Bien separadas las clases:
+        graphs1 = [generate_synthetic_graph_csbm(n_nodes, n_classes, n_features, edge_prob_matrix, node_feature_means, n_infected, semillas[i], 0, feature_cov_matrix=None) for i in range(n_graphs)]
+        for j in range(10):
+            filename = os.path.join(self.path, f'graph_Dir_1000nodes_NoBalanced_100a1000_clasesSep_0{j}.npz')
+            np.savez(filename, x=graphs1[j].x, a=graphs1[j].a, y=graphs1[j].y)
+
+        # Free memory
+        del graphs1
+        gc.collect()
+
+
+    def read(self):
+        output = []
+        
+        n_nodes = 1000
+        n_features = 2
+        
+        for j in range(10):
+            data = np.load(os.path.join(self.path, f'graph_Dir_1000nodes_NoBalanced_100a1000_clasesSep_0{j}.npz'), allow_pickle=True)
+            if self.flattened:
+                x_features = np.ones((n_nodes, n_features))
+            else:
+                x_features = data['x']
+            output.append(
+                Graph(x=x_features, a=data['a'][()], y=data['y']) # también puede ser a=data['a'].item()
+            )
+
+        return output
+    
+
+###########################################################################################################################################################################################################
+
+
+
+    
+###########################################################################################################################################################################################################
+
+
+class synthetic_Dir_1000nodes_NoBalanced_200a1000_clasesSep(Dataset):
+    """
+    10 (ten) synthetic graphs:
+      * directed (i.e. non-symmetric adjacency matrix)
+      * 1000 nodes each
+      * 2 unbalanced classes: 20% for the minority class
+      * "separated" classes 
+      
+    **Arguments**
+    
+    - `flattened`: boolean, indicates whether the features will be flattened to 1.
+    It is False by default.
+    
+    """   
+    def __init__(self, flattened = False, **kwargs):
+        self.flattened = flattened
+        super().__init__(**kwargs)
+
+    @property
+    def path(self):
+        return os.path.join(DATASET_FOLDER, "syntheticGraphs", self.__class__.__name__)
+    
+    def download(self):
+        os.makedirs(self.path)
+        
+        def generate_synthetic_graph_csbm(n_nodes, n_communities, n_features, edge_prob_matrix, node_feature_means,\
+                                  n_infected, semilla, indice, feature_cov_matrix=None):
+            # Assign nodes to communities
+            np.random.seed(semilla*(indice+1))
+            indices = [np.random.randint(0,n_nodes) for i in range(n_infected)]
+            communities = np.array([int(j in indices) for j in range(n_nodes)])
+
+            # Generate node features
+            if feature_cov_matrix is None:
+                feature_cov_matrix = np.eye(n_features)
+            features = np.zeros((n_nodes, n_features))
+            for k in range(n_communities):
+                nodes_in_community = np.where(communities == k)[0]
+                features[nodes_in_community] = np.random.multivariate_normal(node_feature_means[k], feature_cov_matrix,\
+                                                                             len(nodes_in_community))
+
+            # Compute community membership probabilities based on node features
+            community_membership_probs = softmax(features @ node_feature_means.T, axis=1)
+
+            # Generate edges based on community membership probabilities
+            adjacency_matrix = np.zeros((n_nodes, n_nodes))
+            for i in range(n_nodes):
+                for j in range(n_nodes):
+                    if i == j:
+                        continue
+                    community_i = communities[i]
+                    community_j = communities[j]
+                    edge_prob = edge_prob_matrix[community_i, community_j] * community_membership_probs[i, community_j] * community_membership_probs[j, community_i]
+                    adjacency_matrix[i, j] = np.random.binomial(1, edge_prob)
+
+            labels = tf.keras.utils.to_categorical(communities)
+            adjacency_matrix = sparse.csr_matrix(adjacency_matrix)
+            return Graph(x=features, a=adjacency_matrix, y=labels)
+
+        
+        n_graphs = 10
+        n_nodes = 1000
+        n_features = 2
+        n_classes = 2
+        n_infected = 200
+        # Probability matrix for edges between communities
+        edge_prob_matrix = np.array([
+                                        [0.8, 0.2],
+                                        [0.3, 0.7]
+                                    ])
+        # Node feature means for each community
+        node_feature_means = np.array([
+                                        [2, 1], #, 0, 0, 0],
+                                        [1, 2] #, 0, 0, 0]
+                                    ])
+        
+        semillas = [123, 234, 345, 456, 567, 679, 789, 321, 654, 987]
+        
+        # Bien separadas las clases:
+        graphs1 = [generate_synthetic_graph_csbm(n_nodes, n_classes, n_features, edge_prob_matrix, node_feature_means, n_infected, semillas[i], 0, feature_cov_matrix=None) for i in range(n_graphs)]
+        for j in range(10):
+            filename = os.path.join(self.path, f'graph_Dir_1000nodes_NoBalanced_200a1000_clasesSep_0{j}.npz')
+            np.savez(filename, x=graphs1[j].x, a=graphs1[j].a, y=graphs1[j].y)
+
+        # Free memory
+        del graphs1
+        gc.collect()
+
+
+    def read(self):
+        output = []
+        
+        n_nodes = 1000
+        n_features = 2
+        
+        for j in range(10):
+            data = np.load(os.path.join(self.path, f'graph_Dir_1000nodes_NoBalanced_200a1000_clasesSep_0{j}.npz'), allow_pickle=True)
+            if self.flattened:
+                x_features = np.ones((n_nodes, n_features))
+            else:
+                x_features = data['x']
+            output.append(
+                Graph(x=x_features, a=data['a'][()], y=data['y']) # también puede ser a=data['a'].item()
+            )
+
+        return output
+    

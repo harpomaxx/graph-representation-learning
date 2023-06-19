@@ -41,8 +41,10 @@ PREPROC_FEATURES = eval(sys.argv[6])
 
 if FLATTENED:
     PATH_RDOS = os.path.join(PATH_RDO, "flattened")
+    NOMBRE_PRUEBA = str(sys.argv[2]) + "_flattened"
 else: 
     PATH_RDOS = os.path.join(PATH_RDO, "NO_flattened")
+    NOMBRE_PRUEBA = str(sys.argv[2]) + "_NoFlattened"
 
 
 # Limiting GPU memory growth
@@ -81,18 +83,28 @@ def instancia(clase, flatten=False, symmetricAdjacency=False, preprocAdjacency=T
     return inst
 
 
-def predicciones(loader, path, nombre):
-    for _ in range(loader.steps_per_epoch):
-        metricas = open(path, "a")
+def predicciones(loader, nombre):
+    TP_list = []
+    FN_list = []
+    FP_list = []
+    TN_list = []
+    acc = []
+    prec = []
+    rec = []
+    esp = []
+    F1 = []
+    auc = []
+    
+    for k in range(loader.steps_per_epoch):
         inputs,target = loader.__next__()
         y_prediction = model(inputs, training=False)
         y_prediction = np.argmax(np.vstack(y_prediction), axis = 1)
         y_true=np.argmax(np.vstack(target), axis=1)
         prediccion=pd.DataFrame({"true_label":y_true, "prediction":y_prediction})
-        prediccion.to_csv(os.path.join(prediccionesDirectorio,f'prediccion_{str(nombre)}.csv'),index = None)
+        prediccion.to_csv(os.path.join(prediccionesDirectorio,f'{str(NOMBRE_PRUEBA)}_prediccion_{str(nombre)}_0{k}.csv'),index = None)
+        
         #Create confusion matrix and normalizes it over predicted (columns)
         result = tf.math.confusion_matrix(y_true, y_prediction, num_classes=2) 
-        metricas.write(f'confusion matrix:\n {str(result)}\n')
 
         # confusion_matrix = [[TP, FN],
         #                     [FP, TN]]
@@ -108,15 +120,20 @@ def predicciones(loader, path, nombre):
         f1 = (2*precision*recall)/(precision+recall)
         auc_score = roc_auc_score(y_true, y_prediction)
         
-        metricas.write(f'accuracy: {str(accuracy)}\n')
-        metricas.write(f'precision: {str(precision)}\n')
-        metricas.write(f'recall: {str(recall)}\n')
-        metricas.write(f'especificity: {str(especificity)}\n')
-        metricas.write(f'f1: {str(f1)}\n')
-        metricas.write(f'auc_score: {str(auc_score)}\n')
-        metricas.write("==============================\n")
+        TP_list.append(TP)
+        FN_list.append(FN)
+        FP_list.append(FP)
+        TN_list.append(TN)
+        acc.append(accuracy)
+        prec.append(precision)
+        rec.append(recall)
+        esp.append(especificity)
+        F1.append(f1)
+        auc.append(auc_score)
         
-        metricas.close()
+    df = pd.DataFrame({"TP":TP_list, "FN":FN_list, "FP":FP_list, "TN":TN_list, "accuracy":acc, "precision":prec, "recall":rec, "especificity":esp, "f1":F1, "auc_score":auc})
+    df.to_csv(os.path.join(metricasDirectorio, f'{str(NOMBRE_PRUEBA)}_metricas_{str(nombre)}.csv'), index = None)
+
 
 
 ###################################################################################
@@ -201,7 +218,7 @@ for i in range(10):
     res.reset_index(inplace=True)
     # Rename the new column to 'row_id'
     res.rename(columns={'index': 'epoch'}, inplace=True)
-    res.to_csv(os.path.join(graficasDirectorio,"epochsResults.csv"),index = None)          
+    res.to_csv(os.path.join(graficasDirectorio,f'{str(NOMBRE_PRUEBA)}_epochsResults.csv'),index = None)          
     
     sns.set_theme(style="whitegrid")
     line1 = sns.lineplot(x="epoch", y='loss', data=res, label='Training Loss')
@@ -214,7 +231,7 @@ for i in range(10):
     # Create a legend for the lines
     plt.legend()
     # Show the plot
-    plt.savefig(os.path.join(graficasDirectorio,"loss.png"))                             
+    plt.savefig(os.path.join(graficasDirectorio,f'{str(NOMBRE_PRUEBA)}_loss.png'))                             
     plt.clf()
     
     sns.set_theme(style="whitegrid")
@@ -228,12 +245,41 @@ for i in range(10):
     # Create a legend for the lines
     plt.legend()
     # Show the plot
-    plt.savefig(os.path.join(graficasDirectorio,"accuracy.png"))              
+    plt.savefig(os.path.join(graficasDirectorio,f'{str(NOMBRE_PRUEBA)}_accuracy.png'))              
     plt.clf()
     
     # PREDICCION
     loaders = [test_loader, val_loader, train_loader]
     names = ["test", "val", "train"]
     for j in range(len(loaders)):
-        predicciones(loaders[j], os.path.join(metricasDirectorio,f'metricas_{str(names[j])}.txt'), names[j])
-        
+        predicciones(loaders[j], names[j])
+
+
+###############################################################################################
+
+joinDirectorio = os.path.join(PATH_RDOS, "join")
+os.makedirs(joinDirectorio, exist_ok = True)
+
+names = ["test", "val", "train"]
+
+for j in range(len(names)):
+    df1 = pd.read_csv(os.path.join(PATH_RDOS, f'prueba_00/metricas/{str(NOMBRE_PRUEBA)}_metricas_{names[j]}.csv'))
+
+    for i in range(1,10):
+        ARCHIVO = os.path.join(PATH_RDOS, f'prueba_0{i}/metricas/{str(NOMBRE_PRUEBA)}_metricas_{names[j]}.csv')
+        p = pd.read_csv(ARCHIVO)
+        df1 = pd.concat([df1, p], ignore_index=True)
+    
+    df1.to_csv(os.path.join(joinDirectorio, f'{str(NOMBRE_PRUEBA)}_join_{names[j]}.csv'),index = None)
+    
+    sns.set_theme(style="whitegrid")
+    boxplot1 = sns.boxplot(data=df1.iloc[:,7:8]) 
+    plt.savefig(os.path.join(joinDirectorio,f'{str(NOMBRE_PRUEBA)}_especificity_{names[j]}.png'))                             
+    plt.clf()
+    
+    sns.set_theme(style="whitegrid")
+    boxplot2 = sns.boxplot(data=df1.iloc[:,9:10]) 
+    plt.savefig(os.path.join(joinDirectorio,f'{str(NOMBRE_PRUEBA)}_auc_{names[j]}.png'))                             
+    plt.clf()
+    
+    
