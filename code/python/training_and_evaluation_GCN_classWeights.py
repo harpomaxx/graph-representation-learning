@@ -29,7 +29,7 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint
 import datasetsDirigidos
 from preprocess_adjacencyMatrix import GCNConv_preprocess_adjacencyMatrix
 from preprocess_features import GCNConv_preprocess_features
-import loader_tati
+#import loader_tati
 
 import sys
 
@@ -164,30 +164,12 @@ for i in range(10):
     os.makedirs(prediccionesDirectorio, exist_ok = True)
     os.makedirs(metricasDirectorio, exist_ok = True)
     
-    tf.keras.backend.clear_session() ### NO SE SI ESTO ESTA ANDANDO REALMENTE
-
-    indices = np.concatenate((np.arange(i), np.arange(i+1,10)))
-    graphs4train = dataset[indices]
-    test_dataset = dataset[i:i+1]
-    
-    idxs = np.random.permutation(len(graphs4train))
-    split_va = int(0.9 * len(graphs4train))
-    idx_tr, idx_va = np.split(idxs, [split_va])
-    train_dataset = graphs4train[idx_tr]
-    val_dataset = graphs4train[idx_va]
+    tf.keras.backend.clear_session() 
+  
     
     batch_size = 1
     n_epochs = N_EPOCHS
     class_weight = np.array([0.999, 0.001])
-    
-    # Create data loaders for training and testing data
-    train_loader = loader_tati.BatchLoader_Tati(train_dataset, batch_size=batch_size, epochs=n_epochs, shuffle=False, node_level=True, class_weights=class_weight)   ####### ATENCION: mask y shuffle
-       
-    sample_weight = tf.gather(class_weight, tf.argmax(val_dataset[0].y, axis=-1))   
-    val_loader = SingleLoader(val_dataset, epochs=n_epochs) #, sample_weights=sample_weight)
-    
-    sample_weight = tf.gather(class_weight, tf.argmax(test_dataset[0].y, axis=-1))   
-    test_loader = SingleLoader(test_dataset, epochs=n_epochs) #, sample_weights=sample_weight)
 
     n_classes=2
     model = GCN(n_labels=n_classes)
@@ -218,17 +200,47 @@ for i in range(10):
                 verbose=1
                 )
         ]
-
-    # Train the model
-    history = model.fit(
-        train_loader.load(),
-        steps_per_epoch=train_loader.steps_per_epoch,
-        epochs=n_epochs,
-        validation_data=val_loader.load(),
-        validation_steps=val_loader.steps_per_epoch,
-        callbacks=callbacks_list                            
-    )
+        
+    indices = np.concatenate((np.arange(i), np.arange(i+1,10)))
+    graphs4train = dataset[indices]
     
+    # test
+    test_dataset = dataset[i:i+1]
+    test_loader = SingleLoader(test_dataset, epochs=n_epochs) #, sample_weights=sample_weight)
+    
+    idxs = np.random.permutation(len(graphs4train))
+    split_va = int(0.9 * len(graphs4train))
+    idx_tr, idx_va = np.split(idxs, [split_va])
+    
+    # validation
+    val_dataset = graphs4train[idx_va]
+    val_loader = SingleLoader(val_dataset, epochs=n_epochs) #, sample_weights=sample_weight)
+    
+    sample_weight = tf.gather(class_weight, tf.argmax(test_dataset[0].y, axis=-1))   
+    
+    history_list = []
+    for idtr in range(len(idx_tr)):
+        train_dataset = graphs4train[idx_tr[idtr:idtr+1]]
+        sample_weight = tf.gather(class_weight, tf.argmax(train_dataset[0].y, axis=-1)) 
+        train_loader = SingleLoader(train_dataset, epochs=n_epochs, sample_weights=sample_weight)
+        #train_loader = loader_tati.BatchLoader_Tati(train_dataset, batch_size=batch_size, epochs=n_epochs, shuffle=False, node_level=True, class_weights=class_weight)   ####### ATENCION: mask y shuffle
+        
+        # Train the model
+        history = model.fit(
+            train_loader.load(),
+            steps_per_epoch=train_loader.steps_per_epoch,
+            epochs=n_epochs,
+            validation_data=val_loader.load(),
+            validation_steps=val_loader.steps_per_epoch,
+            callbacks=callbacks_list                            
+        )
+        history_list.append(history.history)
+    
+    print(history_list)
+        
+    """
+    # En "suspenso" hasta ver history_list
+        
     ## GRAFICAR
     res=pd.DataFrame(history.history)
     # Add row index as a new column
@@ -264,10 +276,11 @@ for i in range(10):
     # Show the plot
     plt.savefig(os.path.join(graficasDirectorio,f'{str(NOMBRE_PRUEBA)}_accuracy.png'))              
     plt.clf()
+    """
     
     # PREDICCION
-    loaders = [test_loader, val_loader, train_loader]
-    names = ["test", "val", "train"]
+    loaders = [test_loader, val_loader] #, train_loader]
+    names = ["test", "val"] #, "train"]
     for j in range(len(loaders)):
         predicciones(loaders[j], names[j])
 
@@ -277,7 +290,7 @@ for i in range(10):
 joinDirectorio = os.path.join(PATH_RDOS, "join")
 os.makedirs(joinDirectorio, exist_ok = True)
 
-names = ["test", "val", "train"]
+names = ["test", "val"] #, "train"]
 
 for j in range(len(names)):
     df1 = pd.read_csv(os.path.join(PATH_RDOS, f'prueba_00/metricas/{str(NOMBRE_PRUEBA)}_metricas_{names[j]}.csv'))
