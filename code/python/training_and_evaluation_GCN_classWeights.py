@@ -169,7 +169,7 @@ for i in range(10):
     
     batch_size = 1
     n_epochs = N_EPOCHS
-    class_weight = np.array([0.999, 0.001])
+    class_weight = np.array([0.001, 0.999])
 
     n_classes=2
     model = GCN(n_labels=n_classes)
@@ -234,49 +234,53 @@ for i in range(10):
             validation_steps=val_loader.steps_per_epoch,
             callbacks=callbacks_list                            
         )
+        
+        res=pd.DataFrame(history.history)
+        # Add row index as a new column
+        res.reset_index(inplace=True)
+        # Rename the new column to 'row_id'
+        res.rename(columns={'index': 'epoch'}, inplace=True)
+        res.to_csv(os.path.join(graficasDirectorio,f'{str(NOMBRE_PRUEBA)}_epochsResults_{str(idtr)}.csv'),index = None)      
+        
         history_list.append(history.history)
     
     print(history_list)
         
-    """
-    # En "suspenso" hasta ver history_list
+    
         
     ## GRAFICAR
-    res=pd.DataFrame(history.history)
-    # Add row index as a new column
-    res.reset_index(inplace=True)
-    # Rename the new column to 'row_id'
-    res.rename(columns={'index': 'epoch'}, inplace=True)
-    res.to_csv(os.path.join(graficasDirectorio,f'{str(NOMBRE_PRUEBA)}_epochsResults.csv'),index = None)          
-    
-    sns.set_theme(style="whitegrid")
-    line1 = sns.lineplot(x="epoch", y='loss', data=res, label='Training Loss')
-    line2 = sns.lineplot(x="epoch", y='val_loss', data=res, label='Test Loss')
-    # Add points to each observation
-    scatter1 = sns.scatterplot(x="epoch", y='loss', data=res, marker='o', color='skyblue')
-    scatter2 = sns.scatterplot(x="epoch", y='val_loss', data=res, marker='o', color='orange')
+    for m in range(len(history_list)):
+        res = pd.read_csv(os.path.join(graficasDirectorio,f'{str(NOMBRE_PRUEBA)}_epochsResults_{str(m)}.csv'),header=0) 
+        sns.set_theme(style="whitegrid")
+        line1 = sns.lineplot(x="epoch", y='loss', data=res, color='skyblue', alpha=0.1*(m+1))
+        line2 = sns.lineplot(x="epoch", y='val_loss', data=res, color='orange', alpha=0.1*(m+1))
+        # Add points to each observation
+        scatter1 = sns.scatterplot(x="epoch", y='loss', data=res, marker='o', color='skyblue', alpha=0.1*(m+1))
+        scatter2 = sns.scatterplot(x="epoch", y='val_loss', data=res, marker='o', color='orange', alpha=0.1*(m+1))
     # Change the y-axis label
     plt.ylabel("Loss Value")
     # Create a legend for the lines
-    plt.legend()
+    plt.legend(['Training loss', 'Validation loss'])
     # Show the plot
     plt.savefig(os.path.join(graficasDirectorio,f'{str(NOMBRE_PRUEBA)}_loss.png'))                             
     plt.clf()
     
-    sns.set_theme(style="whitegrid")
-    line1 = sns.lineplot(x="epoch", y="accuracy", data=res, label='Training Accuracy')
-    line2 = sns.lineplot(x="epoch", y="val_accuracy", data=res, label='Test Accuracy')
-    # Add points to each observation
-    scatter1 = sns.scatterplot(x="epoch", y="accuracy", data=res, marker='o', color='skyblue')
-    scatter2 = sns.scatterplot(x="epoch", y="val_accuracy", data=res, marker='o', color='orange')
+    for m in range(len(history_list)):
+        res = pd.read_csv(os.path.join(graficasDirectorio,f'{str(NOMBRE_PRUEBA)}_epochsResults_{str(m)}.csv'),header=0) 
+        sns.set_theme(style="whitegrid")
+        line1 = sns.lineplot(x="epoch", y="accuracy", data=res, color='skyblue', alpha=0.1*(m+1))
+        line2 = sns.lineplot(x="epoch", y="val_accuracy", data=res, color='orange', alpha=0.1*(m+1))
+        # Add points to each observation
+        scatter1 = sns.scatterplot(x="epoch", y="accuracy", data=res, marker='o', color='skyblue', alpha=0.1*(m+1))
+        scatter2 = sns.scatterplot(x="epoch", y="val_accuracy", data=res, marker='o', color='orange', alpha=0.1*(m+1))
     # Change the y-axis label
     plt.ylabel("Accuracy Value")
     # Create a legend for the lines
-    plt.legend()
+    plt.legend(['Training accuracy', 'Validation accuracy'])
     # Show the plot
     plt.savefig(os.path.join(graficasDirectorio,f'{str(NOMBRE_PRUEBA)}_accuracy.png'))              
     plt.clf()
-    """
+    
     
     # PREDICCION
     loaders = [test_loader, val_loader] #, train_loader]
