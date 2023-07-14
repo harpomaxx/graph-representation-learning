@@ -14,7 +14,7 @@ from tensorflow.keras.callbacks import EarlyStopping
 
 from spektral.data import Dataset, Graph, SingleLoader, BatchLoader, DisjointLoader
 from spektral.layers import GCNConv
-from spektral.utils import gcn_filter
+from spektral.utils import gcn_filter, degree_matrix
 from spektral.models.gcn import GCN 
 from spektral.datasets.utils import DATASET_FOLDER
 
@@ -38,13 +38,19 @@ FLATTENED = eval(sys.argv[3])
 SYMMETRIC_ADJACENCY = eval(sys.argv[4])
 PREPROC_ADJACENCY = eval(sys.argv[5])
 PREPROC_FEATURES = eval(sys.argv[6])
+DEGREE = eval(sys.argv[7])
 
 if FLATTENED:
     PATH_RDOS = os.path.join(PATH_RDO, "flattened")
     NOMBRE_PRUEBA = str(sys.argv[2]) + "_flattened"
 else: 
-    PATH_RDOS = os.path.join(PATH_RDO, "NO_flattened")
-    NOMBRE_PRUEBA = str(sys.argv[2]) + "_NoFlattened"
+    if DEGREE:
+        PATH_RDOS = os.path.join(PATH_RDO, "NO_flattened_degree")
+        NOMBRE_PRUEBA = str(sys.argv[2]) + "_NoFlattened_degree"
+    else:
+        PATH_RDOS = os.path.join(PATH_RDO, "NO_flattened")
+        NOMBRE_PRUEBA = str(sys.argv[2]) + "_NoFlattened"
+    
 
 
 # Limiting GPU memory growth
@@ -140,6 +146,11 @@ def predicciones(loader, nombre):
 
 dataset = instancia(CLASE, flatten=FLATTENED, symmetricAdjacency=SYMMETRIC_ADJACENCY, preprocAdjacency=PREPROC_ADJACENCY, preprocFeatures=PREPROC_FEATURES)
 
+if DEGREE:
+    for i in range(len(dataset)):
+        dataset[i].x = degree_matrix(dataset[i].a).todense().sum(1)
+
+
 guardarModelo = np.random.randint(10)
 modeloDirectorio = os.path.join(PATH_RDOS,f'prueba_0{guardarModelo}/modelo')
 os.makedirs(modeloDirectorio, exist_ok = True)
@@ -174,7 +185,7 @@ for i in range(10):
     test_loader = SingleLoader(test_dataset, epochs=n_epochs)
 
     n_classes=2
-    model = GCN(n_labels=n_classes)
+    model = GCN(n_labels=n_classes, channels=32)
 
     # Compile the model
     model.compile(optimizer=Adam(learning_rate=0.01), loss="binary_crossentropy", metrics=["accuracy"])
