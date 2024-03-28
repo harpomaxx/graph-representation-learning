@@ -7,11 +7,12 @@ DATASETS="datasetsDirigidos"
 DIRECCION="Dir"
 NODOS=100
 BALANCED="balanced"
-CLASES="Mezcl"
+CLASES="Sep"
 
 
-FLATTENED_YES="True"
+#FLATTENED_YES="True"
 FLATTENED_NO="False"
+DEGREE="True" # Para probar con features de grado, para comparar vs la version flattened 
 
 SYMMETRIC_ADJACENCY="False"
 PREPROC_ADJACENCY="True"
@@ -24,10 +25,10 @@ PATH_RDOS1=${PATH_ACTUAL}/resultados/${DIRECCION}_${NODOS}nodes_${BALANCED}_clas
 
 mkdir -p ${PATH_RDOS1}/code_used
 
-python3 ${PATH_ACTUAL}/code/python/training_and_evaluation_GCN.py ${PATH_RDOS1} ${CLASE1} ${FLATTENED_NO} ${SYMMETRIC_ADJACENCY} ${PREPROC_ADJACENCY} ${PREPROC_FEATURES} |& tee ${PATH_RDOS1}/${BALANCED}_NOflattened.txt &
-python3 ${PATH_ACTUAL}/code/python/training_and_evaluation_GCN.py ${PATH_RDOS1} ${CLASE1} ${FLATTENED_YES} ${SYMMETRIC_ADJACENCY} ${PREPROC_ADJACENCY} ${PREPROC_FEATURES} |& tee ${PATH_RDOS1}/${BALANCED}_flattened.txt &
-cp ${PATH_ACTUAL}/code/python/training_and_evaluation_GCN.py ${PATH_RDOS1}/code_used/
-cp ${PATH_ACTUAL}/code/bash/training_and_evaluation_GCN.sh ${PATH_RDOS1}/code_used/
+python3 ${PATH_ACTUAL}/code/python/training_and_evaluation_GCN.py ${PATH_RDOS1} ${CLASE1} ${FLATTENED_NO} ${SYMMETRIC_ADJACENCY} ${PREPROC_ADJACENCY} ${PREPROC_FEATURES} ${DEGREE} |& tee ${PATH_RDOS1}/${BALANCED}_NOflattened_degree.txt &
+#python3 ${PATH_ACTUAL}/code/python/training_and_evaluation_GCN.py ${PATH_RDOS1} ${CLASE1} ${FLATTENED_YES} ${SYMMETRIC_ADJACENCY} ${PREPROC_ADJACENCY} ${PREPROC_FEATURES} |& tee ${PATH_RDOS1}/${BALANCED}_flattened.txt &
+cp ${PATH_ACTUAL}/code/python/training_and_evaluation_GCN.py ${PATH_RDOS1}/code_used/training_and_evaluation_GCN_degree.py
+cp ${PATH_ACTUAL}/code/bash/training_and_evaluation_GCN.sh ${PATH_RDOS1}/code_used/training_and_evaluation_GCN_degree.sh
 
 
 BALANCED="NoBalanced"
@@ -37,10 +38,10 @@ for i in "${CASOS[@]}"; do
     CLASE2="${DATASETS}.synthetic_${DIRECCION}_${NODOS}nodes_${BALANCED}_${i}a${NODOS}_clases${CLASES}"
     PATH_RDOS2=${PATH_ACTUAL}/resultados/${DIRECCION}_${NODOS}nodes_${BALANCED}_${i}a${NODOS}_clases${CLASES}
     mkdir -p ${PATH_RDOS2}/code_used
-    python3 ${PATH_ACTUAL}/code/python/training_and_evaluation_GCN.py ${PATH_RDOS2} ${CLASE2} ${FLATTENED_NO} ${SYMMETRIC_ADJACENCY} ${PREPROC_ADJACENCY} ${PREPROC_FEATURES} |& tee ${PATH_RDOS2}/${BALANCED}_${i}a${NODOS}_NOflattened.txt &
-    python3 ${PATH_ACTUAL}/code/python/training_and_evaluation_GCN.py ${PATH_RDOS2} ${CLASE2} ${FLATTENED_YES} ${SYMMETRIC_ADJACENCY} ${PREPROC_ADJACENCY} ${PREPROC_FEATURES} |& tee ${PATH_RDOS2}/${BALANCED}_${i}a${NODOS}_flattened.txt &
-    cp ${PATH_ACTUAL}/code/python/training_and_evaluation_GCN.py ${PATH_RDOS2}/code_used/
-    cp ${PATH_ACTUAL}/code/bash/training_and_evaluation_GCN.sh ${PATH_RDOS2}/code_used/
+    python3 ${PATH_ACTUAL}/code/python/training_and_evaluation_GCN.py ${PATH_RDOS2} ${CLASE2} ${FLATTENED_NO} ${SYMMETRIC_ADJACENCY} ${PREPROC_ADJACENCY} ${PREPROC_FEATURES} ${DEGREE} |& tee ${PATH_RDOS2}/${BALANCED}_${i}a${NODOS}_NOflattened_degree.txt &
+    #python3 ${PATH_ACTUAL}/code/python/training_and_evaluation_GCN.py ${PATH_RDOS2} ${CLASE2} ${FLATTENED_YES} ${SYMMETRIC_ADJACENCY} ${PREPROC_ADJACENCY} ${PREPROC_FEATURES} |& tee ${PATH_RDOS2}/${BALANCED}_${i}a${NODOS}_flattened.txt &
+    cp ${PATH_ACTUAL}/code/python/training_and_evaluation_GCN.py ${PATH_RDOS2}/code_used/training_and_evaluation_GCN_degree.py
+    cp ${PATH_ACTUAL}/code/bash/training_and_evaluation_GCN.sh ${PATH_RDOS2}/code_used/training_and_evaluation_GCN_degree.sh
 done
 
 

@@ -146,15 +146,123 @@ def predicciones(loader, nombre):
 
 
 
+def _idx_to_mask(idx, l):
+    mask = np.zeros(l)
+    mask[idx] = 1
+    return np.array(mask, dtype=bool)
+    
+    
 ###################################################################################
 
 dataset = instancia(CLASE, flatten=FLATTENED, symmetricAdjacency=SYMMETRIC_ADJACENCY, preprocAdjacency=PREPROC_ADJACENCY, preprocFeatures=PREPROC_FEATURES)
+grafo = dataset[0:1]
 
-guardarModelo = np.random.randint(10)
-modeloDirectorio = os.path.join(PATH_RDOS,f'prueba_0{guardarModelo}/modelo')
+modeloDirectorio = os.path.join(PATH_RDOS,'modelo')
 os.makedirs(modeloDirectorio, exist_ok = True)
 
+graficasDirectorio = os.path.join(PATH_RDOS,'graficas')
+prediccionesDirectorio = os.path.join(PATH_RDOS,'predicciones')
+metricasDirectorio = os.path.join(PATH_RDOS,'metricas')
+    
+os.makedirs(graficasDirectorio, exist_ok = True)
+os.makedirs(prediccionesDirectorio, exist_ok = True)
+os.makedirs(metricasDirectorio, exist_ok = True)
+    
+n_epochs = N_EPOCHS
+class_weight = np.array([0.001, 0.999])
 
+n_classes=2
+model = GCN(n_labels=n_classes)
+
+# Compile the model
+model.compile(optimizer=Adam(learning_rate=0.01), loss="binary_crossentropy", metrics=["accuracy"])
+
+# Define early stopping to prevent overfitting   
+callbacks_list = [
+            EarlyStopping(
+                monitor="val_loss",
+                patience=10,
+                verbose=1
+                ),
+            ModelCheckpoint(
+                filepath=modeloDirectorio,
+                monitor="val_loss",
+                save_best_only=True,
+                )
+        ]
+
+train_dataset = dataset[0:1]
+val_dataset = dataset[0:1]
+test_dataset = dataset[0:1]
+
+train_dataset[0].x = grafo[0].x[0:80,:]
+train_dataset[0].a = grafo[0].a[0:80,0:80]
+train_dataset[0].y = grafo[0].y[0:80]
+
+val_dataset[0].x = grafo[0].x[80:90,:]
+val_dataset[0].a = grafo[0].a[80:90,80:90]
+val_dataset[0].y = grafo[0].y[80:90]
+
+test_dataset[0].x = grafo[0].x[90:100,:]
+test_dataset[0].a = grafo[0].a[90:100,90:100]
+test_dataset[0].y = grafo[0].y[90:100]
+
+################################
+indices = np.arange(grafo[0].y.shape[0])
+n_classes = grafo[0].y.shape[1]
+idx_tr, idx_te, _, y_te = train_test_split(indices, grafo[0].y, train_size=20 * n_classes, stratify=grafo[0].y)
+idx_va, idx_te = train_test_split(idx_te, train_size=30 * n_classes, stratify=y_te)
+            
+# Train/valid/test masks
+mask_tr = _idx_to_mask(idx_tr, grafo[0].y.shape[0])
+mask_va = _idx_to_mask(idx_va, grafo[0].y.shape[0])
+mask_te = _idx_to_mask(idx_te, grafo[0].y.shape[0])
+
+###############################
+    indices = np.concatenate((np.arange(i), np.arange(i+1,10)))
+    graphs4train = dataset[indices]
+    
+    # test
+    test_dataset = dataset[i:i+1]
+    test_loader = SingleLoader(test_dataset, epochs=n_epochs) #, sample_weights=sample_weight)
+    
+    idxs = np.random.permutation(len(graphs4train))
+    split_va = int(0.9 * len(graphs4train))
+    idx_tr, idx_va = np.split(idxs, [split_va])
+    
+    # validation
+    val_dataset = graphs4train[idx_va]
+    val_loader = SingleLoader(val_dataset, epochs=n_epochs) #, sample_weights=sample_weight)
+    
+    sample_weight = tf.gather(class_weight, tf.argmax(test_dataset[0].y, axis=-1))   
+    
+    history_list = []
+    for idtr in range(len(idx_tr)):
+        train_dataset = graphs4train[idx_tr[idtr:idtr+1]]
+        sample_weight = tf.gather(class_weight, tf.argmax(train_dataset[0].y, axis=-1)) 
+        train_loader = SingleLoader(train_dataset, epochs=n_epochs, sample_weights=sample_weight)
+        #train_loader = loader_tati.BatchLoader_Tati(train_dataset, batch_size=batch_size, epochs=n_epochs, shuffle=False, node_level=True, class_weights=class_weight)   ####### ATENCION: mask y shuffle
+        
+        # Train the model
+        history = model.fit(
+            train_loader.load(),
+            steps_per_epoch=train_loader.steps_per_epoch,
+            epochs=n_epochs,
+            validation_data=val_loader.load(),
+            validation_steps=val_loader.steps_per_epoch,
+            callbacks=callbacks_list                            
+        )
+        
+        res=pd.DataFrame(history.history)
+        # Add row index as a new column
+        res.reset_index(inplace=True)
+        # Rename the new column to 'row_id'
+        res.rename(columns={'index': 'epoch'}, inplace=True)
+        res.to_csv(os.path.join(graficasDirectorio,f'{str(NOMBRE_PRUEBA)}_epochsResults_{str(idtr)}.csv'),index = None)      
+        
+        history_list.append(history.history)
+    
+    
 for i in range(10):
     graficasDirectorio = os.path.join(PATH_RDOS,f'prueba_0{i}/graficas')
     prediccionesDirectorio = os.path.join(PATH_RDOS,f'prueba_0{i}/predicciones')
@@ -316,5 +424,4 @@ for j in range(len(names)):
     plt.savefig(os.path.join(joinDirectorio,f'{str(NOMBRE_PRUEBA)}_auc_{names[j]}.png'))                             
     plt.clf()
     
-   
-
+    
