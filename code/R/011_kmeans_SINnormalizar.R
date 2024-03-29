@@ -8,10 +8,11 @@ TIPO <- args[1]
 
 df <- readr::read_csv("all_captures_except_9_SINnormalizar.csv", show_col_types = FALSE)
 
-
+#X <- df[,3:8] # QUITO AC!!! 
 X <- df[,3:9]
 numberClusters <- c(4,9,16,25,36,49,64,81,100,121,144,169,196,225)
-
+#c(4,16,36,64,100,144,196)
+#c(4,9,16,25,36,49,64,81,100,121,144,169,196,225)
 
 botnets <- which(df$label == "botnet")
 normals <- which(df$label == "normal")
@@ -35,6 +36,8 @@ for (cluster in numberClusters) {
     zz <- file(paste("kmeans_", cluster, "_clusters_",TIPO,"_SINnormalizar.txt", sep = ""), open = "wt")
     sink(zz)
     sink(zz, type = "message")
+
+    #sink(file = paste("kmeans_", cluster, "_clusters_",TIPO,".txt", sep = ""), type = "output")
     
     vectAuxBotnet <- c()
     vectAuxNormal <- c()
@@ -42,6 +45,7 @@ for (cluster in numberClusters) {
     HOB_val <- 0
     
     cat("\n For k = ", cluster, ": \n")
+    #gc()
     time_kmeans <- system.time(kmeans.re <- kmeans(X, centers = cluster, nstart = 10, iter.max=10000, algorithm = TIPO))
     
     aux <- as.data.frame(kmeans.re$cluster)
@@ -120,4 +124,3 @@ readr::write_csv(df, paste("features_normalized_and_kmeans_",TIPO,"_SINnormaliza
 
 hobob <- data.frame(k,HOB,HOB_percent,BOB,BOB_percent)
 readr::write_csv(hobob, paste("HOB_BOB_table_",TIPO,"_SINnormalizar.csv",sep=""))
-

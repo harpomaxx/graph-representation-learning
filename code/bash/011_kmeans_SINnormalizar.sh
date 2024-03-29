@@ -14,6 +14,7 @@ Rscript ${PATH_REPO}/code/R/011_kmeans_SINnormalizar.R "Lloyd" |& tee kmeans_L_S
 #mv *Hartigan-Wong_SINnormalizar.txt kmeans_HW_SINnormalizar/
 #mv *Hartigan-Wong_SINnormalizar.csv kmeans_HW_SINnormalizar/
 
+# Agregue Lloyd
 #mv *Lloyd_SINnormalizar.txt kmeans_L_SINnormalizar/
 #mv *Lloyd_SINnormalizar.csv kmeans_L_SINnormalizar/
 
